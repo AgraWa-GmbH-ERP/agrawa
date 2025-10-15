@@ -49,8 +49,8 @@ app_license = "mit"
 # doctype_calendar_js = {"doctype" : "public/js/doctype_calendar.js"}
 doctype_js = {
     "Customer": "public/js/customer.js",
-    "Sales Order": "public/js/sales_order.js"
-
+    "Sales Order": "public/js/sales_order.js",
+    "Purchase Invoice": "public/js/custom_purchase_invoice.js"
 }
 # Svg Icons
 # ------------------
