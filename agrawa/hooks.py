@@ -13,8 +13,10 @@ doctype_list_js = {
 app_include_js = "agrawa.bundle.js"
 
 doctype_js = {
+    "Quotation": "public/js/quotation.js",
     "Customer": "public/js/customer.js",
     "Sales Order": "public/js/sales_order.js",
+    "Sales Invoice": "public/js/sales_invoice.js",
     "Purchase Invoice": "public/js/custom_purchase_invoice.js"
 }
 
