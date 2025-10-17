@@ -60,3 +60,17 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	doc.set_missing_values()
 
 	return doc
+
+
+@frappe.whitelist()
+def check_qualification_card_required(item_code, customer):
+	if not item_code or not customer:
+		return False
+
+	item_data = frappe.db.get_value('Item', item_code, 'custom_is_qualification_card_required', as_dict=True)
+	if item_data and item_data.custom_is_qualification_card_required:
+		customer_data = frappe.db.get_value('Customer', customer, 'custom_is_qualification_card_available', as_dict=True)
+		if customer_data and not customer_data.custom_is_qualification_card_available:
+			return True
+
+	return False
