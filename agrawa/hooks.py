@@ -10,6 +10,8 @@ doctype_list_js = {
     "Purchase Invoice": "public/js/purchase_invoice_list.js",
 }
 
+app_include_js = "agrawa.bundle.js"
+
 doctype_js = {
     "Customer": "public/js/customer.js",
     "Sales Order": "public/js/sales_order.js",
