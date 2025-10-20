@@ -14,10 +14,17 @@ app_include_js = "agrawa.bundle.js"
 
 doctype_js = {
     "Customer": "public/js/custom_customer.js",
-    "Sales Order": "public/js/custom_sales_order.js",
+    "Sales Order": [
+        "public/js/custom_sales_order.js",
+        "public/js/bio_faktii_common.js"
+    ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
     "Purchase Order": "public/js/custom_purchase_order.js",
-    "Quotation": "public/js/quotation.js"
+    "Quotation": [
+        "public/js/quotation.js",
+        "public/js/bio_faktii_common.js",
+    ],
+    "Sales Invoice": "public/js/bio_faktii_common.js",
 }
 
 doc_events = {
