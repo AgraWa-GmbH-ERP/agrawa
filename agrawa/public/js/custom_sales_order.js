@@ -2,7 +2,6 @@ frappe.provide("agrawa.sales_utils");
 
 frappe.ui.form.on('Sales Order', {
     onload: function(frm) {
-        console.log("Setting suppliers for all items on Sales Order load");
         set_suppliers_for_all_items(frm);
     },
     refresh: function(frm) {
