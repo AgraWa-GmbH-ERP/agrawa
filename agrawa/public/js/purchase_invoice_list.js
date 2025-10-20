@@ -7,8 +7,8 @@ frappe.listview_settings['Purchase Invoice'] = {
 	get_indicator(doc) {
 		// custom colors
 		const custom_colors = {
-			'Billed': 'orange',
-			'Paid and Billed': 'green',
+			'Billed': 'yellow',
+			'Paid and Billed': 'blue',
 		};
 
 		if (custom_colors[doc.status]) {
