@@ -24,7 +24,10 @@ doctype_js = {
         "public/js/quotation.js",
         "public/js/bio_faktii_common.js",
     ],
-    "Sales Invoice": "public/js/bio_faktii_common.js",
+    "Sales Invoice": [
+        "public/js/sales_invoice.js",
+        "public/js/bio_faktii_common.js"
+    ],
 }
 
 doc_events = {
