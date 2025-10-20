@@ -37,10 +37,9 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 		if is_drop_ship_order(target):
 			# ✅ Auto set supplier from first item (or from your logic)
-			for so_item in source.items:
-				if so_item.delivered_by_supplier and so_item.supplier:
-					target.supplier = so_item.supplier
-					break  # use first found supplier
+			selected_suppliers = [item.get("supplier") for item in source.items if item.get("item_code") in items_to_map and item.get("supplier")]
+			if selected_suppliers:
+				target.supplier = selected_suppliers[0]
 
 			# set shipping & customer info
 			if source.shipping_address_name:
