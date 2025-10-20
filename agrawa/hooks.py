@@ -13,7 +13,10 @@ doctype_list_js = {
 doctype_js = {
     "Customer": "public/js/customer.js",
     "Sales Order": "public/js/sales_order.js",
-    "Purchase Invoice": "public/js/custom_purchase_invoice.js"
+    "Purchase Invoice": "public/js/custom_purchase_invoice.js",
+    "Quotation": "public/js/bio_faktii_common.js",
+    "Sales Order": "public/js/bio_faktii_common.js",
+    "Sales Invoice": "public/js/bio_faktii_common.js",
 }
 
 doc_events = {
