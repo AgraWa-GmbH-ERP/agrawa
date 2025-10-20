@@ -10,12 +10,20 @@ doctype_list_js = {
     "Purchase Invoice": "public/js/purchase_invoice_list.js",
 }
 
+app_include_js = "agrawa.bundle.js"
+
 doctype_js = {
-    "Customer": "public/js/customer.js",
-    "Sales Order": "public/js/sales_order.js",
+    "Customer": "public/js/custom_customer.js",
+    "Sales Order": [
+        "public/js/custom_sales_order.js",
+        "public/js/bio_faktii_common.js"
+    ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
-    "Quotation": "public/js/bio_faktii_common.js",
-    "Sales Order": "public/js/bio_faktii_common.js",
+    "Purchase Order": "public/js/custom_purchase_order.js",
+    "Quotation": [
+        "public/js/quotation.js",
+        "public/js/bio_faktii_common.js",
+    ],
     "Sales Invoice": "public/js/bio_faktii_common.js",
 }
 

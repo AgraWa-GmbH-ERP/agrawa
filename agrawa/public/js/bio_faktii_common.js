@@ -11,6 +11,7 @@ const CHILD_TABLE_MAP = {
 
 frappe.ui.form.on(cur_frm.doctype, {
     onload(frm) {
+        console.log("Attaching Bio/Faktii behavior for", frm.doctype);
         const parent = frm.doctype;
         const child = CHILD_TABLE_MAP[parent];
         if (!child) return;
