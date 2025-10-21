@@ -6,19 +6,18 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		target.posting_date = source.posting_date
 		target.due_date = source.due_date
-		target.custom_delivery_date = source.custom_supplier_delivery_date
+		# target.custom_delivery_date = source.custom_supplier_delivery_date
 		target.custom_purchase_invoice = source.name
 		target.taxes_and_charges = None
 		target.taxes = []
 
-		customer = None
+		target.customer = None
 		for item in source.items:
 			if item.purchase_order:
-				customer = frappe.db.get_value("Purchase Order", item.purchase_order, "customer")
-				if customer:
-					break
-
-		target.customer = customer
+				for po_item in frappe.get_all("Purchase Order Item", filters={"parent": item.purchase_order}, fields=["sales_order"]):
+					if po_item.sales_order:
+						target.customer = frappe.db.get_value("Sales Order", po_item.sales_order, "customer")
+						break
 
 		if target.customer:
 			target.customer_address = frappe.db.get_value(
