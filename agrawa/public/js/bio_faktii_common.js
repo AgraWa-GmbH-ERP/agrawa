@@ -1,7 +1,7 @@
 const BIO_TEXT =
-    'für die ökologische Produktion / Landwirtschaft zugelassen EU-ÖkoVO (EG-VO Nr.: 2018/848)';
+    '* für die ökologische Produktion / Landwirtschaft zugelassen EU-ÖkoVO (EG-VO Nr.: 2018/848)';
 const FAKTII_TEXT =
-    'Die Saatgutmischung entspricht hinsichtlich Arten und Mischungsanteilen den Anforderungen der FAKT II-Maßnahme E1.2 "Begrünungsmischungen im Acker-/Gartenbau".';
+    '** Die Saatgutmischung entspricht hinsichtlich Arten und Mischungsanteilen den Anforderungen der FAKT II-Maßnahme E1.2 "Begrünungsmischungen im Acker-/Gartenbau".';
 
 const CHILD_TABLE_MAP = {
     "Quotation": "Quotation Item",
@@ -34,14 +34,15 @@ function attach_bio_faktii_behavior(parentDoctype, childDoctype) {
                 );
                 if (!item) return;
 
-                const needs_star = item.custom_is_bio || item.custom_is_faktii_e12;
-                const clean_name = item.item_name.replace(/\*+$/, '').trim();
-                const new_name = needs_star ? `${clean_name} *` : clean_name;
+                setTimeout(() => {
+                    const clean_name = item.item_name.replace(/\*+$/, '').trim();
+                    const new_name = item.custom_is_bio ? `${clean_name} *` : item.custom_is_faktii_e12 ? `${clean_name} **` : clean_name;
 
-                frappe.model.set_value(cdt, cdn, 'item_name', new_name);
-                frm.fields_dict.items.grid.refresh_row(cdn);
+                    frappe.model.set_value(cdt, cdn, 'item_name', new_name);
+                    frm.fields_dict.items.grid.refresh_row(cdn);
 
-                setTimeout(() => update_terms_field(frm), 150);
+                    update_terms_field(frm);
+                }, 250);
             }, 100);
         },
 
