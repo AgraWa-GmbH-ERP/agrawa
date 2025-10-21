@@ -6,6 +6,7 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		target.posting_date = source.posting_date
 		target.due_date = source.due_date
+		target.custom_delivery_date = source.custom_supplier_delivery_date
 		target.custom_purchase_invoice = source.name
 		target.taxes_and_charges = None
 		target.taxes = []
@@ -62,15 +63,15 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	return doc
 
 
-@frappe.whitelist()
-def check_qualification_card_required(item_code, customer):
-	if not item_code or not customer:
-		return False
+# @frappe.whitelist()
+# def check_qualification_card_required(item_code, customer):
+# 	if not item_code or not customer:
+# 		return False
 
-	item_data = frappe.db.get_value('Item', item_code, 'custom_is_qualification_card_required', as_dict=True)
-	if item_data and item_data.custom_is_qualification_card_required:
-		customer_data = frappe.db.get_value('Customer', customer, 'custom_is_qualification_card_available', as_dict=True)
-		if customer_data and not customer_data.custom_is_qualification_card_available:
-			return True
+# 	item_data = frappe.db.get_value('Item', item_code, 'custom_is_qualification_card_required', as_dict=True)
+# 	if item_data and item_data.custom_is_qualification_card_required:
+# 		customer_data = frappe.db.get_value('Customer', customer, 'custom_is_qualification_card_available', as_dict=True)
+# 		if customer_data and not customer_data.custom_is_qualification_card_available:
+# 			return True
 
-	return False
+# 	return False
