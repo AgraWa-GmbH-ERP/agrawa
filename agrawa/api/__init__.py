@@ -11,7 +11,7 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 		target.taxes_and_charges = None
 		target.taxes = []
 
-		target.customer = None
+		target.customer = target.contact_person = target.contact_display = None
 		for item in source.items:
 			if item.purchase_order:
 				for po_item in frappe.get_all("Purchase Order Item", filters={"parent": item.purchase_order}, fields=["sales_order"]):
