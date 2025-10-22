@@ -6,7 +6,7 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		target.posting_date = source.posting_date
 		target.due_date = source.due_date
-		# target.custom_delivery_date = source.custom_supplier_delivery_date
+		target.custom_delivery_date = source.custom_supplier_delivery_date
 		target.custom_purchase_invoice = source.name
 		target.taxes_and_charges = None
 		target.taxes = []
