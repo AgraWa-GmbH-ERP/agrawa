@@ -74,3 +74,21 @@ def check_qualification_card_required(item_code, customer):
 			return True
 
 	return False
+
+
+@frappe.whitelist()
+def distance_range_code_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""
+        SELECT 
+            code as name, distance_range as value
+        FROM `tabDistance Range Code`
+		WHERE name LIKE %(txt)s
+            OR code LIKE %(txt)s
+        ORDER BY 
+            CAST(code AS UNSIGNED) ASC
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        "txt": f"%{txt}%",
+        "start": start,
+        "page_len": page_len
+    })
