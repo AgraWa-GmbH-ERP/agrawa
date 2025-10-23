@@ -16,7 +16,29 @@ frappe.ui.form.on(cur_frm.doctype, {
         if (!child) return;
 
         attach_bio_faktii_behavior(parent, child);
-    }
+    },
+    
+    tc_name(frm) {
+        const current_terms = frm.doc.terms || "";
+        const has_bio = current_terms.includes(BIO_TEXT);
+        const has_faktii = current_terms.includes(FAKTII_TEXT);
+
+        setTimeout(async () => {
+            const { message: tc } = await frappe.db.get_value(
+                "Terms and Conditions",
+                frm.doc.tc_name,
+                ["terms"]
+            );
+            if (!tc?.terms) return;
+
+            let new_terms = tc.terms.trim();
+            if (has_bio) new_terms += `<br>${BIO_TEXT}`;
+            if (has_faktii) new_terms += `<br>${FAKTII_TEXT}`;
+
+            await frm.set_value("terms", new_terms);
+            frm.refresh_field("terms");
+        }, 100);
+    },
 });
 
 
