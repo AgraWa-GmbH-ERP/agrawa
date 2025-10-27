@@ -6,7 +6,7 @@ def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
 	def postprocess(source, target):
 		target.posting_date = source.posting_date
 		target.due_date = source.due_date
-		# target.custom_delivery_date = source.custom_supplier_delivery_date
+		target.custom_delivery_date = source.custom_supplier_delivery_date
 		target.custom_purchase_invoice = source.name
 		target.taxes_and_charges = None
 		target.taxes = []
@@ -74,3 +74,21 @@ def check_qualification_card_required(item_code, customer):
 			return True
 
 	return False
+
+
+@frappe.whitelist()
+def distance_range_code_query(doctype, txt, searchfield, start, page_len, filters):
+    return frappe.db.sql("""
+        SELECT 
+            code as name, distance_range as value
+        FROM `tabDistance Range Code`
+		WHERE name LIKE %(txt)s
+            OR code LIKE %(txt)s
+        ORDER BY 
+            CAST(code AS UNSIGNED) ASC
+        LIMIT %(start)s, %(page_len)s
+    """, {
+        "txt": f"%{txt}%",
+        "start": start,
+        "page_len": page_len
+    })
