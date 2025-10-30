@@ -1,7 +1,7 @@
-{% set has_sales_order = False %}
+{% set ns = namespace(has_sales_order=False) %}
 {% for item in doc.items %}
     {% if item.sales_order %}
-        {% set has_sales_order = True %}
+        {% set ns.has_sales_order = True %}
     {% endif %}
 {% endfor %}
 
@@ -82,7 +82,7 @@
         
     <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
         <b>{{ _("Shipped To:") }}</b><br>
-        {% if has_sales_order %}
+        {% if ns.has_sales_order %}
             {{ doc.customer_name }}<br>
         
             {# Address line #}
