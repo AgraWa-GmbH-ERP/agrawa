@@ -18,11 +18,11 @@
 
     <!-- Left side (address block inside window) -->
     <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
-        <span style="color: #A11929;">AgraWa GmbH</span> 
+        <span style="color: #B2160E;">AgraWa GmbH</span> 
         <span style="color: green;">|</span> 
-        <span style="color: #A11929;">Sonnenbergstr. 17/1</span> 
+        <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
         <span style="color: green;">|</span> 
-        <span style="color: #A11929;">71665 Vaihingen/Enz</span>
+        <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
         
         <div style="margin-top: 0.2cm;">
             <strong>{{ doc.supplier }}</strong><br>
@@ -34,7 +34,7 @@
 
     <!-- Right side (company info) -->
     <div style="text-align: left; font-size: 11px; line-height: 1.5; margin-left: auto; margin-right:20mm;  height: 100%;">
-        <span style="color: #A11929;"><b>AgraWa GmbH</b></span><br>
+        <span style="color: #B2160E;"><b>AgraWa GmbH</b></span><br>
         Sonnenbergstr. 17/1 <br>
         D-71665 Vaihingen/Enz <br>
         Mobil: +49 176 17942780 <br>
@@ -204,7 +204,7 @@
                 {% if ns.show_supplier_col %}
                     <td>{{ supplier_part_no or '' }}</td>
                 {% endif %}
-                <td class="text-right">{{ "{:,.2f}".format(item.rate) }}</td>
+            <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
                 <td>{{ item.stock_uom or '' }}</td>
                 <td class="text-right">{{ item.qty }}</td>
 
@@ -228,22 +228,37 @@
                 
                 <td>{{ item.qty / (selected_factor | float) }}</td>
                 <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
-                <td class="text-right">{{ "{:,.2f}".format(item.amount) }}</td>
+            <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
             </tr>
         {% endfor %}
 
         <!-- Totals -->
         <tr>
             <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Net Amount") }}</b></td>
-            <td class="text-right"><b>{{ doc.get_formatted("total") }}</b></td>
+            <td class="text-right"><b>{{ "{:,.2f}".format(doc.total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
         </tr>
-        <tr>
-            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Additional VAT") }}</b></td>
-            <td class="text-right"><b>{{ doc.get_formatted("total_taxes_and_charges") }}</b></td>
-        </tr>
+         <!-- Tax Row -->
+        {% for item in doc.taxes %}
+        {% if item.base_tax_amount and item.base_tax_amount != 0 %}
+            <tr>
+            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right">
+                <b>
+                {% if "19" in item.description %}
+                    {{ _("Additional VAT 19%") }}
+                {% elif "7" in item.description %}
+                    {{ _("Additional VAT 7%") }}
+                {% endif %}
+                </b>
+            </td>
+            <td class="text-right">
+                <b>{{ "{:,.2f}".format(item.base_tax_amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b>
+            </td>
+            </tr>
+        {% endif %}
+        {% endfor %}
         <tr>
             <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Grand Total") }}</b></td>
-            <td class="text-right"><b>{{ doc.get_formatted("grand_total") }}</b></td>
+            <td class="text-right"><b>  <b>{{ "{:,.2f}".format(doc.grand_total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
         </tr>
     </tbody>
 </table>
@@ -260,7 +275,7 @@
     <br>
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        Vielen Dank im Voraus & Herzliche Grüße, <br>
+        Vielen Dank im Voraus <br>
         Mit freundlichen Grüßen: 
         <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
             <img src="/files/image1-23.png" alt="Logo" style="width: 150px; height: auto;">
@@ -317,9 +332,29 @@
     .print-format h1, 
     .print-format h1 * {
     font-size: 24px !important;
-    color: #A11929;
+    color: #B2160E;
     margin: 0;
     letter-spacing: 2px;
     }
+    .pricetable thead th:nth-child(-n+5) {
+  background-color: #B2160E !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+
+.pricetable thead th:nth-child(n+6) {
+  background-color: #83AD29 !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+  .pricetable th:nth-child(1), .pricetable td:nth-child(1) { width: 1cm; }
+  .pricetable th:nth-child(2), .pricetable td:nth-child(2) { width: 3cm; }
+  .pricetable th:nth-child(3), .pricetable td:nth-child(3) { width: 3cm; }
+  .pricetable th:nth-child(4), .pricetable td:nth-child(4) { width: 1.5cm; }
+  .pricetable th:nth-child(5), .pricetable td:nth-child(5) { width: 1.5cm; }
+  .pricetable th:nth-child(6), .pricetable td:nth-child(6) { width: 2cm; text-align: right; }
+  .pricetable th:nth-child(7), .pricetable td:nth-child(7) { width: 1.5cm; text-align: right; }
+  .pricetable th:nth-child(8), .pricetable td:nth-child(8) { width: 1cm; text-align: right; }
+  .pricetable th:nth-child(9), .pricetable td:nth-child(9) { width: 2.5cm; text-align: right; }
  
 </style>
