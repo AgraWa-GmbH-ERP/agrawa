@@ -28,6 +28,8 @@ doctype_js = {
         "public/js/sales_invoice.js",
         "public/js/bio_faktii_common.js"
     ],
+    "Print Format": "public/js/custom_print_format.js"
+
 }
 
 doc_events = {

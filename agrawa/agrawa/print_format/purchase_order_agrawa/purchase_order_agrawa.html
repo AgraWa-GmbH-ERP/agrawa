@@ -1,0 +1,360 @@
+{% set ns = namespace(has_sales_order=False) %}
+{% for item in doc.items %}
+    {% if item.sales_order %}
+        {% set ns.has_sales_order = True %}
+    {% endif %}
+{% endfor %}
+
+
+<!-- LETTER HEAD -->
+{% if letter_head %}
+<div class="print-format-header" id="header-html" style="height:45mm; overflow:hidden; padding:0; margin:0;">
+    {{ letter_head }}
+</div>
+{% endif %}
+
+<!-- Address + Company info section -->
+<div style="display: flex; justify-content: space-between; align-items: flex-start; height:45mm;">
+
+    <!-- Left side (address block inside window) -->
+    <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
+        <span style="color: #B2160E;">AgraWa GmbH</span> 
+        <span style="color: green;">|</span> 
+        <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
+        <span style="color: green;">|</span> 
+        <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
+        
+        <div style="margin-top: 0.2cm;">
+            <strong>{{ doc.supplier }}</strong><br>
+            {% if doc.address_display %}
+                {{ doc.address_display }}
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Right side (company info) -->
+    <div style="text-align: left; font-size: 11px; line-height: 1.5; margin-left: auto; margin-right:20mm;  height: 100%;">
+        <span style="color: #B2160E;"><b>AgraWa GmbH</b></span><br>
+        Sonnenbergstr. 17/1 <br>
+        D-71665 Vaihingen/Enz <br>
+        Mobil: +49 176 17942780 <br>
+        Tel.: +49 7042 2763572 <br>
+        Mail: <a href="mailto:info@agrawa.de">info@agrawa.de</a>
+    </div>
+</div>
+
+<!-- BODY Wrapper -->
+<div><h1 style="text-align: center;"><b>BESTELLUNG</b></h1></div>
+<br>
+<div style="margin-left: 10mm; margin-right: 10mm;">
+    <h3>{{ _("Customer No.") }}:{{doc.customer}}</h3>
+    <div>Die folgende Nummer muss auf allen Dokumenten,<br>
+            Frachtpapieren und Rechnungen aufgeführt sein:<br>
+            <b>AUFTRAGSNUMMER: {{doc.name}}</b>
+            </div>
+    <br>
+ <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+    <!-- Left side -->
+    <div>
+        <b>{{ _("Invoice To:") }}</b><br>
+        AgraWa GmbH<br>
+        Steffen Schweikart<br>
+        Sonnenbergstraße 17/1<br>
+        D-71665 Vaihingen/Enz-Aurich<br>
+        +49 7042/2763-572
+    </div>
+
+    {% if doc.important_information %}
+    <div style="position: absolute; left: 50%; transform: translateX(-50%); text-align: center;">
+        <b>{{_("Important Information:")}}</b><br>
+        {{ doc.important_information }}
+    </div>
+    {% endif %}
+
+    <!-- Right side -->
+    {% set address = frappe.db.sql("""
+        SELECT a.address_line1, a.pincode, a.city, a.custom_mobile_no, a.phone
+        FROM `tabAddress` a
+        JOIN `tabDynamic Link` dl ON dl.parent = a.name
+        WHERE dl.link_doctype = 'Customer' AND dl.link_name = %s
+        LIMIT 1
+        """, (doc.customer,)) %}
+        
+    <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
+        <b>{{ _("Shipped To:") }}</b><br>
+        {% if ns.has_sales_order %}
+            {{ doc.customer_name }}<br>
+        
+            {# Address line #}
+            {% if address and address[0][0] %}
+                {{ address[0][0] }}<br>
+            {% endif %}
+        
+            {# Pincode + City line #}
+            {% if address and (address[0][1] or address[0][2]) %}
+                {% if address[0][1] and address[0][2] %}
+                    {{ address[0][1] }}, {{ address[0][2] }}<br>
+                {% elif address[0][1] %}
+                    {{ address[0][1] }}<br>
+                {% elif address[0][2] %}
+                    {{ address[0][2] }}<br>
+                {% endif %}
+            {% endif %}
+        
+            {# Show custom_mobile_no if present, otherwise phone #}
+            {% if address %}
+                {% set mobile = address[0][3] or address[0][4] %}
+                {% if mobile %}
+                    Tel: {{ mobile }}
+                {% endif %}
+            {% endif %}
+        {% else %}
+            {% set default_wh = frappe.db.get_single_value("Stock Settings", "default_warehouse") %}
+            {% if default_wh %}
+                {% set wh = frappe.db.get_value("Warehouse",
+                    default_wh,
+                    ["warehouse_name", "address_line_1", "address_line_2", "city", "pin", "phone_no", "mobile_no"],
+                    as_dict=True
+                ) %}
+                {% if wh %}
+                    {{ wh.warehouse_name }}<br>
+                    {% if wh.address_line_1 %}{{ wh.address_line_1 }}<br>{% endif %}
+                    {% if wh.address_line_2 %}{{ wh.address_line_2 }}<br>{% endif %}
+                    {% if wh.pin or wh.city %}
+                        {% if wh.pin and wh.city %}
+                            {{ wh.pin }}, {{ wh.city }}<br>
+                        {% elif wh.pin %}
+                            {{ wh.pin }}<br>
+                        {% elif wh.city %}
+                            {{ wh.city }}<br>
+                        {% endif %}
+                    {% endif %}
+                    {% if wh.mobile_no or wh.phone_no %}
+                        Tel: {{ wh.mobile_no or wh.phone_no }}
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+
+    <br>
+    
+    <table class=" table-sm pricetable" >
+    	<thead>
+    		<tr class="">
+    			<th width="20%">{{ _("Date") }}</th>
+    			<th width="20%">{{ _("Supplier Name") }}</th>
+    			<th width="20%">{{ _("Shipping Per") }}</th>
+    			<th width="20%">{{ _("Delivery Date") }}</th>
+    			<th width="20%">{{ _("Conditions") }}</th>
+    
+    		</tr>
+    	</thead>
+        <tbody>
+            <tr>
+                <td>{{ doc.transaction_date }}</td>
+                <td>{{ doc.supplier or '' }}</td>
+                <td>{{ doc.custom_shipping_per or ''}}</td>
+                <td>{{ doc.custom_delivery_date or ''}}</td>
+                <td>{{ doc.custom_conditions or ''}}</td>
+            </tr>
+    
+        </tbody>
+    </table>
+<br>
+{% set ns = namespace(show_supplier_col=false) %}
+{% for item in doc.items %}
+    {% set item_doc = frappe.get_doc("Item", item.item_code) %}
+    {% if item_doc.supplier_items and item_doc.supplier_items[0].supplier_part_no %}
+        {% set ns.show_supplier_col = true %}
+    {% endif %}
+{% endfor %}
+
+<table class="table-sm pricetable">
+    <thead>
+        <tr>
+            <th width="5%">{{ _("Pos.") }}</th>
+            <th width="15%">{{ _("Item Name") }}</th>
+            <th width="20%">{{ _("Description") }}</th>
+            {% if ns.show_supplier_col %}
+                <th width="5%">{{ _("Supplier Item No") }}</th>
+            {% endif %}
+            <th width="10%" class="text-right">{{ _("Purchase Price") }}</th>
+            <th width="5%" class="text-right">{{ _("Pricing Unit") }}</th>
+            <th width="5%" class="text-right">{{ _("Amount") }}</th>
+            <th width="5%" class="text-right">{{ _("Packing Amount") }}</th>
+            <th width="5%">{{ _("Packing Unit") }}</th>
+            <th width="10%" class="text-right">{{ _("Total Amount") }}</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in doc.items %}
+            {% set item_doc = frappe.get_doc("Item", item.item_code) %}
+            {% if item_doc.supplier_items and item_doc.supplier_items|length > 0 %}
+                {% set supplier_part_no = item_doc.supplier_items[0].supplier_part_no %}
+            {% else %}
+                {% set supplier_part_no = "" %}
+            {% endif %}
+
+            <tr>
+                <td>{{ loop.index }}</td>
+                <td>{{ item.item_name or '' }}</td>
+                <td>{{ item.description or '' }}</td>
+                {% if ns.show_supplier_col %}
+                    <td>{{ supplier_part_no or '' }}</td>
+                {% endif %}
+            <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+                <td>{{ item.stock_uom or '' }}</td>
+                <td class="text-right">{{ item.qty }}</td>
+
+                {% set conversion_factor_list = frappe.db.get_all(
+                    "UOM Conversion Detail",
+                    filters={
+                        "parent": item.item_code,
+                        "parenttype": "Item",
+                        "parentfield": "uoms"
+                    },
+                    fields=["conversion_factor"],
+                    limit_start=0, 
+                    limit_page_length=1
+                ) %}
+                
+                {% if conversion_factor_list and conversion_factor_list[0].conversion_factor %}
+                    {% set selected_factor = conversion_factor_list[0].conversion_factor %}
+                {% else %}
+                    {% set selected_factor = 1 %}
+                {% endif %}
+                
+                <td>{{ item.qty / (selected_factor | float) }}</td>
+                <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
+            <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+            </tr>
+        {% endfor %}
+
+        <!-- Totals -->
+        <tr>
+            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Net Amount") }}</b></td>
+            <td class="text-right"><b>{{ "{:,.2f}".format(doc.total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
+        </tr>
+         <!-- Tax Row -->
+        {% for item in doc.taxes %}
+        {% if item.base_tax_amount and item.base_tax_amount != 0 %}
+            <tr>
+            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right">
+                <b>
+                {% if "19" in item.description %}
+                    {{ _("Additional VAT 19%") }}
+                {% elif "7" in item.description %}
+                    {{ _("Additional VAT 7%") }}
+                {% endif %}
+                </b>
+            </td>
+            <td class="text-right">
+                <b>{{ "{:,.2f}".format(item.base_tax_amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b>
+            </td>
+            </tr>
+        {% endif %}
+        {% endfor %}
+        <tr>
+            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Grand Total") }}</b></td>
+            <td class="text-right"><b>  <b>{{ "{:,.2f}".format(doc.grand_total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
+        </tr>
+    </tbody>
+</table>
+
+
+
+    <br>
+    <div style="page-break-inside: avoid;">
+        <p>
+            <b>{{ doc.tc_name or '' }}</b><br>
+            {{ doc.terms or ''}}
+        </p>
+    </div>
+    <br>
+    <!-- Greeting -->
+    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
+        Vielen Dank im Voraus <br>
+        Mit freundlichen Grüßen: 
+        <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
+            <img src="/files/image1-23.png" alt="Logo" style="width: 150px; height: auto;">
+        </div>
+        Steffen Schweikart
+    </div>
+
+</div>
+
+    <br>
+<!--Footer-->
+<div id="footer-html" class="visible-pdf">
+    <div class="print-format-footer">
+        {{ footer }}
+    </div>
+</div>
+
+<style>
+    body, .print-format{
+    font-size: 12px !important;
+    font-family: Arial, sans-serif;
+    padding: 0px ;
+    }
+
+    /* Header ke liye padding */
+    .print-format-header {
+    padding: 10px 25px; /* top-bottom 10px, left-right 25px */
+    margin: 0 auto;
+    }
+
+    /* Pricetable adjustments */
+    .pricetable {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px; /* thora aur chhota */
+    }
+
+    .pricetable th, .pricetable td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    word-wrap: break-word;
+    white-space: normal;
+    font-size: 10px; /* aur compact */
+    }
+
+    .pricetable thead th {
+    background: #f0f0f0;
+    font-weight: bold;
+    }
+
+    .pricetable .text-right {
+    text-align: right;
+    }
+    .print-format h1, 
+    .print-format h1 * {
+    font-size: 24px !important;
+    color: #B2160E;
+    margin: 0;
+    letter-spacing: 2px;
+    }
+    .pricetable thead th:nth-child(-n+5) {
+  background-color: #B2160E !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+
+.pricetable thead th:nth-child(n+6) {
+  background-color: #83AD29 !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+  .pricetable th:nth-child(1), .pricetable td:nth-child(1) { width: 1cm; }
+  .pricetable th:nth-child(2), .pricetable td:nth-child(2) { width: 3cm; }
+  .pricetable th:nth-child(3), .pricetable td:nth-child(3) { width: 3cm; }
+  .pricetable th:nth-child(4), .pricetable td:nth-child(4) { width: 1.5cm; }
+  .pricetable th:nth-child(5), .pricetable td:nth-child(5) { width: 1.5cm; }
+  .pricetable th:nth-child(6), .pricetable td:nth-child(6) { width: 2cm; text-align: right; }
+  .pricetable th:nth-child(7), .pricetable td:nth-child(7) { width: 1.5cm; text-align: right; }
+  .pricetable th:nth-child(8), .pricetable td:nth-child(8) { width: 1cm; text-align: right; }
+  .pricetable th:nth-child(9), .pricetable td:nth-child(9) { width: 2.5cm; text-align: right; }
+ 
+</style>
