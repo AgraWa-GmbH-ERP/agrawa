@@ -177,15 +177,14 @@
             <th width="5%">{{ _("Pos.") }}</th>
             <th width="15%">{{ _("Item Name") }}</th>
             <th width="20%">{{ _("Description") }}</th>
+            <th width="5%">{{ _("Packing Unit") }}</th>
             {% if ns.show_supplier_col %}
                 <th width="5%">{{ _("Supplier Item No") }}</th>
             {% endif %}
             <th width="10%" class="text-right">{{ _("Purchase Price") }}</th>
+            <th width="5%" class="text-right">{{ _("Menge / EH") }}</th>
             <th width="5%" class="text-right">{{ _("Pricing Unit") }}</th>
-            <th width="5%" class="text-right">{{ _("Amount") }}</th>
-            <th width="5%" class="text-right">{{ _("Packing Amount") }}</th>
-            <th width="5%">{{ _("Packing Unit") }}</th>
-            <th width="10%" class="text-right">{{ _("Total Amount") }}</th>
+            <th width="2cm" class="text-right">{{ _("Total Amount") }}</th>
         </tr>
     </thead>
     <tbody>
@@ -196,52 +195,32 @@
             {% else %}
                 {% set supplier_part_no = "" %}
             {% endif %}
-
+            
             <tr>
                 <td>{{ loop.index }}</td>
                 <td>{{ item.item_name or '' }}</td>
                 <td>{{ item.description or '' }}</td>
+                <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
                 {% if ns.show_supplier_col %}
                     <td>{{ supplier_part_no or '' }}</td>
                 {% endif %}
-            <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
-                <td>{{ item.stock_uom or '' }}</td>
+                <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
                 <td class="text-right">{{ item.qty }}</td>
-
-                {% set conversion_factor_list = frappe.db.get_all(
-                    "UOM Conversion Detail",
-                    filters={
-                        "parent": item.item_code,
-                        "parenttype": "Item",
-                        "parentfield": "uoms"
-                    },
-                    fields=["conversion_factor"],
-                    limit_start=0, 
-                    limit_page_length=1
-                ) %}
-                
-                {% if conversion_factor_list and conversion_factor_list[0].conversion_factor %}
-                    {% set selected_factor = conversion_factor_list[0].conversion_factor %}
-                {% else %}
-                    {% set selected_factor = 1 %}
-                {% endif %}
-                
-                <td>{{ item.qty / (selected_factor | float) }}</td>
-                <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
-            <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+                <td>{{ item.stock_uom or '' }}</td>
+                <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
             </tr>
         {% endfor %}
 
         <!-- Totals -->
         <tr>
-            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Net Amount") }}</b></td>
+            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right"><b>{{ _("Net Amount") }}</b></td>
             <td class="text-right"><b>{{ "{:,.2f}".format(doc.total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
         </tr>
          <!-- Tax Row -->
         {% for item in doc.taxes %}
         {% if item.base_tax_amount and item.base_tax_amount != 0 %}
             <tr>
-            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right">
+            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right">
                 <b>
                 {% if "19" in item.description %}
                     {{ _("Additional VAT 19%") }}
@@ -257,7 +236,7 @@
         {% endif %}
         {% endfor %}
         <tr>
-            <td colspan="{{ 9 if ns.show_supplier_col else 8 }}" class="text-right"><b>{{ _("Grand Total") }}</b></td>
+            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right"><b>{{ _("Grand Total") }}</b></td>
             <td class="text-right"><b>  <b>{{ "{:,.2f}".format(doc.grand_total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
         </tr>
     </tbody>
@@ -348,13 +327,13 @@
   color: #fff !important;
 }
   .pricetable th:nth-child(1), .pricetable td:nth-child(1) { width: 1cm; }
-  .pricetable th:nth-child(2), .pricetable td:nth-child(2) { width: 3cm; }
-  .pricetable th:nth-child(3), .pricetable td:nth-child(3) { width: 3cm; }
+  .pricetable th:nth-child(2), .pricetable td:nth-child(2) { width: 3.5cm; }
+  .pricetable th:nth-child(3), .pricetable td:nth-child(3) { width: 3.5cm; }
   .pricetable th:nth-child(4), .pricetable td:nth-child(4) { width: 1.5cm; }
   .pricetable th:nth-child(5), .pricetable td:nth-child(5) { width: 1.5cm; }
   .pricetable th:nth-child(6), .pricetable td:nth-child(6) { width: 2cm; text-align: right; }
   .pricetable th:nth-child(7), .pricetable td:nth-child(7) { width: 1.5cm; text-align: right; }
   .pricetable th:nth-child(8), .pricetable td:nth-child(8) { width: 1cm; text-align: right; }
-  .pricetable th:nth-child(9), .pricetable td:nth-child(9) { width: 2.5cm; text-align: right; }
+  .pricetable th:nth-child(9), .pricetable td:nth-child(9) { width: 2cm; text-align: right; }
  
 </style>
