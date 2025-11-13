@@ -154,10 +154,7 @@ def split_invoice(sales_order):
 				"rate": item.rate,
 				"amount": item.amount,
 				"warehouse": item.warehouse,
-				# "sales_order": so_doc.name,
-				# "so_detail": item.name,
-				# "delivery_date": item.delivery_date,
-				# "custom_customer": item.custom_customer,
+				# "custom_main_sales_order": so_doc.name,
 			})
 		
 		# Set missing values and calculate taxes
