@@ -28,13 +28,18 @@ doctype_js = {
         "public/js/sales_invoice.js",
         "public/js/bio_faktii_common.js"
     ],
+    "Sales Order": "public/js/sales_order.js",
     "Print Format": "public/js/custom_print_format.js"
 
 }
 
 doc_events = {
     "Sales Invoice": {
-        "on_submit": "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing",
+        "on_submit": [
+            "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing",
+            "agrawa.overrides.custom_sales_invoice.set_sales_invoice_on_collective_sales_order"
+        ],
+        "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_collective_sales_order"
     }
 }
 

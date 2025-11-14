@@ -1,5 +1,42 @@
 frappe.provide("agrawa.sales_utils");
 
+frappe.ui.form.on('Sales Order', {
+    refresh: function(frm) {
+        if (frm.doc.docstatus === 1) {
+            let unique_customers = new Set();
+            if (frm.doc.items) {
+                frm.doc.items.forEach(item => {
+                    if (item.custom_customer) {
+                        unique_customers.add(item.custom_customer);
+                    }
+                });
+            }
+            if (unique_customers.size > 1) {
+                frm.add_custom_button(__('Split Invoice'), function() {
+                        frappe.call({
+                            method: 'agrawa.api.create_split_invoice',
+                            args: {
+                                sales_order: frm.doc.name
+                            },
+                            callback: function(response) {
+                                if (response.message && response.message.length > 0) {
+                                    let invoices = response.message.map(inv => `<a href="/app/sales-invoice/${inv}">${inv}</a>`).join(', ');
+                                    frappe.msgprint(__(`Invoices created: ${invoices}`));
+                                } else {
+                                    frappe.msgprint(__('No invoices were created.'));
+                                }
+                            }
+                    });
+                }, __('Create'));
+
+            }
+            
+        }
+
+    }
+});
+
+
 frappe.ui.form.on('Sales Order Item', {
     item_code: function(frm, cdt, cdn) {
         let row = locals[cdt][cdn];
