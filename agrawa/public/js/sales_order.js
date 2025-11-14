@@ -14,7 +14,7 @@ frappe.ui.form.on('Sales Order', {
             if (unique_customers.size > 1) {
                 frm.add_custom_button(__('Split Invoice'), function() {
                         frappe.call({
-                            method: 'agrawa.api.split_invoice',
+                            method: 'agrawa.api.create_split_invoice',
                             args: {
                                 sales_order: frm.doc.name
                             },

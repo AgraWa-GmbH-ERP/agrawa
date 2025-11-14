@@ -95,38 +95,28 @@ def distance_range_code_query(doctype, txt, searchfield, start, page_len, filter
 
 
 @frappe.whitelist()
-def split_invoice(sales_order):
-	"""Split Sales Order into multiple Sales Invoices based on custom_customer in items, for every unique customer there should be 1 sales invoice."""
-	
-	# Get the Sales Order document
+def create_split_invoice(sales_order):	
 	so_doc = frappe.get_doc("Sales Order", sales_order)
 	
 	# Check if Sales Order is submitted
 	if so_doc.docstatus != 1:
 		frappe.throw("Sales Order must be submitted to create invoices")
 	
-	# Group items by custom_customer
 	customer_items = {}
 	for item in so_doc.items:
-		customer = item.custom_customer or so_doc.customer
-		if customer not in customer_items:
-			customer_items[customer] = []
-		customer_items[customer].append(item)
-	
-	# Check if there are multiple customers
-	if len(customer_items) <= 1:
-		frappe.throw("Sales Order must have items for multiple customers to split")
-	
-	# Create Sales Invoices for each customer
+		if not item.custom_individual_sales_invoice:
+			customer = item.custom_customer
+			if customer not in customer_items:
+				customer_items[customer] = []
+			customer_items[customer].append(item)
+
 	created_invoices = []
 	for customer, items in customer_items.items():
-		# Create Sales Invoice
 		si = frappe.new_doc("Sales Invoice")
 		si.customer = customer
 		si.posting_date = frappe.utils.today()
 		si.set_posting_time = 0
 		
-		# Copy relevant fields from Sales Order
 		si.company = so_doc.company
 		si.currency = so_doc.currency
 		si.conversion_rate = so_doc.conversion_rate
@@ -135,13 +125,11 @@ def split_invoice(sales_order):
 		si.plc_conversion_rate = so_doc.plc_conversion_rate
 		si.ignore_pricing_rule = so_doc.ignore_pricing_rule
 		
-		# Copy customer address and contact if they match
 		if customer == so_doc.customer:
 			si.customer_address = so_doc.customer_address
 			si.contact_person = so_doc.contact_person
 			si.shipping_address_name = so_doc.shipping_address_name
 		
-		# Add items for this customer
 		for item in items:
 			si.append("items", {
 				"item_code": item.item_code,
@@ -154,17 +142,14 @@ def split_invoice(sales_order):
 				"rate": item.rate,
 				"amount": item.amount,
 				"warehouse": item.warehouse,
-				# "custom_main_sales_order": so_doc.name,
+				"custom_collective_sales_order": so_doc.name,
+				"custom_collective_so_detail": item.name,
 			})
 		
-		# Set missing values and calculate taxes
 		si.set_missing_values()
 		si.calculate_taxes_and_totals()
 		
-		# Insert the Sales Invoice
 		si.save()
 		created_invoices.append(si.name)
-	
-	frappe.msgprint(f"Created {len(created_invoices)} Sales Invoice(s): {', '.join(created_invoices)}")
 	
 	return created_invoices
