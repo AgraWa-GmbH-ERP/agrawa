@@ -125,6 +125,10 @@ def create_split_invoice(sales_order):
 		si.plc_conversion_rate = so_doc.plc_conversion_rate
 		si.ignore_pricing_rule = so_doc.ignore_pricing_rule
 		
+		if so_doc.taxes_and_charges:
+			si.taxes_and_charges = so_doc.taxes_and_charges
+			si.set_taxes()
+
 		if customer == so_doc.customer:
 			si.customer_address = so_doc.customer_address
 			si.contact_person = so_doc.contact_person
