@@ -181,7 +181,7 @@
             {% if ns.show_supplier_col %}
                 <th width="5%">{{ _("Supplier Item No") }}</th>
             {% endif %}
-            <th width="10%" class="text-right">{{ _("Purchase Price") }}</th>
+            <th width="10%" class="text-right price-header">{{ _("Preis / EH") }}</th>
             <th width="5%" class="text-right">{{ _("Menge / EH") }}</th>
             <th width="5%" class="text-right">{{ _("Pricing Unit") }}</th>
             <th width="2cm" class="text-right">{{ _("Total Amount") }}</th>
@@ -322,6 +322,11 @@
 }
 
 .pricetable thead th:nth-child(n+6) {
+  background-color: #83AD29 !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+.pricetable thead th.price-header {
   background-color: #83AD29 !important;
   border: 1px solid #ccc !important;
   color: #fff !important;

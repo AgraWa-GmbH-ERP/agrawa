@@ -52,14 +52,15 @@
                     {% set po = frappe.get_doc("Purchase Order", first_pi_item.purchase_order) %}
                     {% set first_po_item = po.items[0] if po.items else None %}
                     
-                    <!-- Purchase Order Number -->
-                    <b>Auftrags-/AngebotsN°: </b>{{ po.name }}<br>
-        
-                    <!-- Sales Order Date -->
                     {% if first_po_item and first_po_item.sales_order %}
                         {% set so = frappe.get_doc("Sales Order", first_po_item.sales_order) %}
+                        <!-- Sales Order Number -->
+                        <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
+                        <!-- Sales Order Date -->
                         <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
                     {% else %}
+                        <!-- Fallback to Purchase Order Number -->
+                        <b>Auftrags-/AngebotsN°: </b>—<br>
                         <b>Auftragsdatum: </b>—<br>
                     {% endif %}
                 {% else %}
