@@ -1,7 +1,7 @@
 from frappe import _
 
 
-def purchase_invoice_dashboard(data):	
+def purchase_invoice_dashboard(data):
 	data["internal_links"]["Sales Order"] = ["items", "custom_sales_order"]
 	for i, d in enumerate(data["transactions"]):
 		if d["label"] == _("Reference"):
