@@ -4,7 +4,7 @@ from erpnext.buying.doctype.purchase_order.purchase_order import set_missing_val
 from erpnext.accounts.party import get_party_account
 from erpnext.setup.doctype.item_group.item_group import get_item_group_defaults
 from erpnext.stock.doctype.item.item import get_item_defaults
-from frappe import flt
+from frappe.utils import flt
 import frappe
 from frappe.model.naming import make_autoname
 from datetime import datetime
