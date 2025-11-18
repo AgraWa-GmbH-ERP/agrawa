@@ -95,7 +95,7 @@ def get_mapped_purchase_invoice(source_name, target_doc=None, ignore_permissions
 			"field_map": {
 				"name": "po_detail",
 				"parent": "purchase_order",
-				"sales_order": "custom_sales_order",
+				"sales_order": "custom_sales_order", # this line is modified 
 				"material_request": "material_request",
 				"material_request_item": "material_request_item",
 				"wip_composite_asset": "wip_composite_asset",
