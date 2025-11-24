@@ -44,38 +44,13 @@
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
-
-            {% if doc.custom_purchase_invoice %}
-                {% set pi = frappe.get_doc("Purchase Invoice", doc.custom_purchase_invoice) %}
-                {% set first_pi_item = pi.items[0] if pi.items else None %}
-                {% if first_pi_item and first_pi_item.purchase_order %}
-                    {% set po = frappe.get_doc("Purchase Order", first_pi_item.purchase_order) %}
-                    {% set first_po_item = po.items[0] if po.items else None %}
-                    
-                    {% if first_po_item and first_po_item.sales_order %}
-                        {% set so = frappe.get_doc("Sales Order", first_po_item.sales_order) %}
-                        <!-- Sales Order Number -->
-                        <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
-                        <!-- Sales Order Date -->
-                        <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
-                    {% else %}
-                        <!-- Fallback to Purchase Order Number -->
-                        <b>Auftrags-/AngebotsN°: </b>—<br>
-                        <b>Auftragsdatum: </b>—<br>
-                    {% endif %}
-                {% else %}
-                    <b>Auftrags-/AngebotsN°: </b>—<br>
-                    <b>Auftragsdatum: </b>—<br>
-                {% endif %}
-        
-                <!-- Lieferdatum from Purchase Invoice -->
-                {% if pi.custom_supplier_delivery_date %}
-                    <b>Lieferdatum: </b>{{ pi.custom_supplier_delivery_date }}<br>
-                {% else %}
-                    <b>Lieferdatum: </b>—<br>
-                {% endif %}
+            {% set first_si_item = doc.items[0] if doc.items else None %}
+            {% if first_si_item and first_si_item.sales_order %}
+                {% set so = frappe.get_doc("Sales Order", first_si_item.sales_order) %}
+                <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
+                <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
             {% endif %}
-        
+            <b>Lieferdatum: </b>{{ doc.custom_supplier_delivery_date or "" }}<br>
             <b>Kundennr.: </b>{{ doc.customer }}<br>
             <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>
             +49 176 17942780<br>
