@@ -50,7 +50,9 @@
                 <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
                 <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
             {% endif %}
-            <b>Lieferdatum: </b>{{ doc.custom_supplier_delivery_date or "" }}<br>
+            {% if doc.custom_supplier_delivery_date %}
+                <b>Lieferdatum: </b>{{ doc.custom_supplier_delivery_date }}<br>
+            {% endif %}
             <b>Kundennr.: </b>{{ doc.customer }}<br>
             <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>
             +49 176 17942780<br>
