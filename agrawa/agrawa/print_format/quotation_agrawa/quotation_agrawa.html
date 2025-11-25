@@ -36,7 +36,7 @@
 </div>
 
 <!-- BODY Wrapper -->
-<div style="margin-left: 10mm; margin-right: 10mm;">
+<div style="margin-left: 4mm; margin-right: 4mm;">
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
@@ -69,30 +69,30 @@
 
     <table class=" table-sm pricetable" >
 	<thead>
-		<tr class="">
-			<th style="width:1.0cm;">{{ _("Pos") }}</th>
-			<th width="3cm">{{ _("Item Name") }}</th>
-			<th width="3cm">{{ _("Description") }}</th>
-			<th width="1.5cm">{{ _("Packing Unit") }}</th>
-			<th width="1.5cm">{{ _("Item Number") }}</th>
-    		<th width="2cm" class="text-right">{{ _("Sales Price") }}</th>
-			<th width="1.5cm" class="text-right">{{ _("Menge / EH") }}</th>
-			<th width="1cm" class="text-right">{{ _("Pricing Unit") }}</th>
-			<th width="2.5cm" class="text-right">{{ _("Total Amount") }}</th>
-		</tr>
+        <tr class="">
+            <th style="width:5.88%;">{{ _("Pos") }}</th>
+            <th style="width:17.65%;">{{ _("Item Name") }}</th>
+            <th style="width:17.65%;">{{ _("Description") }}</th>
+            <th style="width:8.82%;">{{ _("Packing Unit") }}</th>
+            <th style="width:8.82%;">{{ _("Item Number") }}</th>
+            <th style="width:11.76%;" class="text-right">{{ _("Sales Price") }}</th>
+            <th style="width:8.82%;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:5.88%;" class="text-right">{{ _("Pricing Unit") }}</th>
+            <th style="width:14.71%;" class="text-right">{{ _("Total Amount") }}</th>
+        </tr>
 	</thead>
     <tbody>
         {% for item in doc.items %}
         <tr>
-            <td>{{ loop.index }}</td>
-            <td>{{ item.item_name or '' }}</td>
-            <td>{{ item.description or '' }}</td>
-            <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
-            <td>{{ item.item_code }}</td>
-            <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
-            <td class="text-right">{{ item.qty }}</td>
-            <td>{{ item.stock_uom or '' }}</td>
-            <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+            <td style="word-wrap:break-word;">{{ loop.index }}</td>
+            <td style="word-wrap:break-word;"><div style="width:65px">{{ item.item_name or '' }}</div></td>
+            <td style="word-wrap:break-word;"><div style="width:45px">{{ item.description or '' }}</div></td>
+            <td style="word-wrap:break-word;">{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
+            <td style="word-wrap:break-word;">{{ item.item_code }}</td>
+            <td style="word-wrap:break-word; text-align: right;" >{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+            <td style="word-wrap:break-word; text-align: right;" >{{ item.qty }}</td>
+            <td style="word-wrap:break-word;">{{ item.stock_uom or '' }}</td>
+            <td style="word-wrap:break-word; text-align: right;">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
         </tr>
         {% endfor %}
         <!-- Net Amount -->
@@ -175,7 +175,6 @@
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
-  table-layout: fixed;
 }
 
 .pricetable th, .pricetable td {
@@ -213,14 +212,5 @@
   letter-spacing: 2px;
 }
 
-  .pricetable th:nth-child(1), .pricetable td:nth-child(1) { width: 1cm; }
-  .pricetable th:nth-child(2), .pricetable td:nth-child(2) { width: 3.5cm; }
-  .pricetable th:nth-child(3), .pricetable td:nth-child(3) { width: 3.5cm; }
-  .pricetable th:nth-child(4), .pricetable td:nth-child(4) { width: 1.5cm; }
-  .pricetable th:nth-child(5), .pricetable td:nth-child(5) { width: 1.5cm; }
-  .pricetable th:nth-child(6), .pricetable td:nth-child(6) { width: 2cm; text-align: right; }
-  .pricetable th:nth-child(7), .pricetable td:nth-child(7) { width: 1.5cm; text-align: right; }
-  .pricetable th:nth-child(8), .pricetable td:nth-child(8) { width: 1cm; text-align: right; }
-  .pricetable th:nth-child(9), .pricetable td:nth-child(9) { width: 2.5cm; text-align: right; }
  
 </style>
