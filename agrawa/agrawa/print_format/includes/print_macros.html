@@ -62,5 +62,21 @@ body, .print-format{
   white-space: normal;
   font-size: 10px; /* compact */
 }
+
+.pricetable .text-right {
+  text-align: right;
+}
+
+.pricetable thead th:nth-child(-n+5) {
+  background-color: #B2160E !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+
+.pricetable thead th:nth-child(n+6) {
+  background-color: #83AD29 !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
 </style>
 {%- endmacro %}
