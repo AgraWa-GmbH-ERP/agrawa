@@ -10,7 +10,7 @@
 {{ render_letter_head(letter_head) }}
 
 <!-- Address + Company info section -->
-<div style="display: flex; justify-content: space-between; align-items: flex-start; height:45mm;">
+<div class="company-and-address-info">
 
     <!-- Left side (address block inside window) -->
     <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
@@ -34,7 +34,7 @@
 <!-- BODY Wrapper -->
 <div><h1 style="text-align: center;"><b>BESTELLUNG</b></h1></div>
 <br>
-<div style="margin-left: 4mm; margin-right: 4mm;">
+<div class="body-wrapper">
     <h3>{{ _("Customer No.") }}:{{doc.customer}}</h3>
     <div>Die folgende Nummer muss auf allen Dokumenten,<br>
             Frachtpapieren und Rechnungen aufgeführt sein:<br>
