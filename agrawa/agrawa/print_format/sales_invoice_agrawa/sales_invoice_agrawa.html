@@ -1,9 +1,5 @@
-<!-- LETTER HEAD -->
-{% if letter_head %}
-<div class="print-format-header" id="header-html" style="height:45mm; overflow:hidden; padding:0; margin:0;">
-    {{ letter_head }}
-</div>
-{% endif %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
+{{ render_letter_head(letter_head) }}
 
 <!-- Address + Company info section -->
 <div style="display: flex; justify-content: space-between; align-items: flex-start; height:45mm;">
@@ -24,15 +20,7 @@
         </div>
     </div>
 
-    <!-- Right side (company info) -->
-    <div style="text-align: left; font-size: 11px; line-height: 1.5; margin-left: auto; margin-right:20mm;  height: 100%;">
-        <span style="color: #B2160E;"><b>AgraWa GmbH</b></span><br>
-        Sonnenbergstr. 17/1 <br>
-        D-71665 Vaihingen/Enz <br>
-        Mobil: +49 176 17942780 <br>
-        Tel.: +49 7042 2763572 <br>
-        Mail: <a href="mailto:info@agrawa.de">info@agrawa.de</a>
-    </div>
+    {{ render_company_block() }}
 </div>
 
 <!-- BODY Wrapper -->
@@ -103,16 +91,16 @@
             <td>{{ item.description or '' }}</td>
             <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
             <td>{{ item.item_code }}</td>
-            <td class="text-right">{{ "{:,.2f}".format(item.rate).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+            <td class="text-right">{{ format_currency(item.rate) }}</td>
             <td class="text-right">{{ item.qty }}</td>
             <td>{{ item.stock_uom or '' }}</td>
-            <td class="text-right">{{ "{:,.2f}".format(item.amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</td>
+            <td class="text-right">{{ format_currency(item.amount) }}</td>
         </tr>
         {% endfor %}
         <!-- Net Amount -->
         <tr>
             <td colspan="8" class="text-right"><b>{{ _("Net Amount") }}</b></td>
-            <td class="text-right"><b>{{ "{:,.2f}".format(doc.total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
+            <td class="text-right"><b>{{ format_currency(doc.total) }}</b></td>
         </tr>
         <!-- Tax Row -->
          {% for item in doc.taxes %}
@@ -128,7 +116,7 @@
                     </b>
                 </td>
                 <td class="text-right">
-                    <b>{{ "{:,.2f}".format(item.base_tax_amount).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b>
+                    <b>{{ format_currency(item.base_tax_amount) }}</b>
                 </td>
                 </tr>
             {% endif %}
@@ -137,7 +125,7 @@
         <!-- Grand Total Row -->
         <tr>
             <td colspan="8" class="text-right"><b>{{ _("Grand Total") }}</b></td>
-            <td class="text-right"><b>  <b>{{ "{:,.2f}".format(doc.grand_total).replace(",", "X").replace(".", ",").replace("X", ".") }} €</b></td>
+            <td class="text-right"><b>{{ format_currency(doc.grand_total) }}</b></td>
         </tr>
 
     </tbody>
@@ -167,41 +155,10 @@
 </div>
 
     <br>
-<!--Footer-->
-<div id="footer-html" class="visible-pdf">
-    <div class="print-format-footer">
-        {{ footer }}
-    </div>
-</div>
+{{ render_footer(footer) }}
+{{ render_shared_styles() }}
 
 <style>
-        body, .print-format{
-  font-size: 12px !important;
-  font-family: Arial, sans-serif;
-  padding: 0px ;
-}
-
-/* Header ke liye padding */
-.print-format-header {
-  padding: 10px 25px; /* top-bottom 10px, left-right 25px */
-  margin: 0 auto;
-}
-
-/* Pricetable adjustments */
-.pricetable {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 11px;
-}
-
-.pricetable th, .pricetable td {
-  border: 1px solid #ccc;
-  padding: 6px;
-  word-wrap: break-word;
-  white-space: normal;
-  font-size: 10px; /* aur compact */
-}
-
 .pricetable thead th {
   /* background: #f0f0f0; */
   font-weight: bold;
