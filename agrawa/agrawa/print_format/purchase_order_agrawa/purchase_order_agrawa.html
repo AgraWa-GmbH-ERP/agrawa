@@ -152,13 +152,7 @@
         </tbody>
     </table>
 <br>
-{% set ns = namespace(show_supplier_col=false) %}
-{% for item in doc.items %}
-    {% set item_doc = frappe.get_doc("Item", item.item_code) %}
-    {% if item_doc.supplier_items and item_doc.supplier_items[0].supplier_part_no %}
-        {% set ns.show_supplier_col = true %}
-    {% endif %}
-{% endfor %}
+
 
 <table class="table-sm pricetable">
     <thead>
@@ -188,9 +182,7 @@
                 <td>{{ item.item_name or '' }}</td>
                 <td>{{ item.description or '' }}</td>
                 <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
-                {% if ns.show_supplier_col %}
                     <td>{{ supplier_part_no or '' }}</td>
-                {% endif %}
                 <td class="text-right">{{ format_currency(item.rate) }}</td>
                 <td class="text-right">{{ item.qty }}</td>
                 <td>{{ item.stock_uom or '' }}</td>
@@ -200,14 +192,14 @@
 
         <!-- Totals -->
         <tr>
-            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right"><b>{{ _("Net Amount") }}</b></td>
+            <td colspan="8" class="text-right"><b>{{ _("Net Amount") }}</b></td>
             <td class="text-right"><b>{{ format_currency(doc.total) }}</b></td>
         </tr>
          <!-- Tax Row -->
         {% for item in doc.taxes %}
         {% if item.base_tax_amount and item.base_tax_amount != 0 %}
             <tr>
-            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right">
+            <td colspan="8" class="text-right">
                 <b>
                 {% if "19" in item.description %}
                     {{ _("Additional VAT 19%") }}
@@ -223,7 +215,7 @@
         {% endif %}
         {% endfor %}
         <tr>
-            <td colspan="{{ 8 if ns.show_supplier_col else 7 }}" class="text-right"><b>{{ _("Grand Total") }}</b></td>
+            <td colspan="8" class="text-right"><b>{{ _("Grand Total") }}</b></td>
             <td class="text-right"><b>  <b>{{ format_currency(doc.grand_total) }}</b></td>
         </tr>
     </tbody>
