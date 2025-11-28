@@ -1,6 +1,8 @@
 {% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
 {{ render_letter_head(letter_head) }}
 
+{% set user_details = frappe.db.get_value("User", {"name": frappe.session.user}, ["full_name", "email_signature"], as_dict=1) %}
+
 <!-- Address + Company info section -->
 <div class="company-and-address-info">
 
@@ -129,10 +131,8 @@
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
         Wir freuen uns, sollte dieses Angebot Ihre Zustimmung finden. Bei Rückfragen stehen wir Ihnen gerne zur Verfügung. <br>
         Mit freundlichen Grüßen: 
-        <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
-            <img src="/files/image1-23.png" alt="Logo" style="width: 150px; height: auto;">
-        </div>
-        Steffen Schweikart
+        {{ user_details.email_signature if user_details.email_signature else '' }}
+        {{ user_details.full_name if user_details.full_name else '' }}
     </div>
 
 </div>
