@@ -53,6 +53,7 @@ body, .print-format{
   width: 100%;
   border-collapse: collapse;
   font-size: 11px;
+  table-layout: fixed;
 }
 
 .pricetable th, .pricetable td {
@@ -77,6 +78,12 @@ body, .print-format{
   background-color: #83AD29 !important;
   border: 1px solid #ccc !important;
   color: #fff !important;
+}
+.pricetable th:nth-child(2), .pricetable td:nth-child(2) .pricetable th:nth-child(3), .pricetable td:nth-child(3) { 
+  width: 3.5cm; 
+  max-width: 3.5cm; 
+  word-wrap: break-word;
+  overflow-wrap: break-word; 
 }
 .company-and-address-info {
   display: flex;
