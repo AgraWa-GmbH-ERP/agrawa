@@ -39,7 +39,7 @@
  "grid_page_length": 50,
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2025-12-08 10:22:37.831209",
+ "modified": "2025-12-08 10:42:20.721564",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "User Signature",
@@ -56,6 +56,16 @@
    "report": 1,
    "role": "System Manager",
    "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "if_owner": 1,
+   "read": 1,
+   "role": "Sales User",
+   "select": 1,
    "write": 1
   }
  ],
