@@ -40,6 +40,9 @@ doc_events = {
             "agrawa.overrides.custom_sales_invoice.set_sales_invoice_on_collective_sales_order"
         ],
         "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_collective_sales_order"
+    },
+    "Sales Order": {
+        "before_save": "agrawa.overrides.custom_sales_order.set_dropshipping_data"
     }
 }
 
