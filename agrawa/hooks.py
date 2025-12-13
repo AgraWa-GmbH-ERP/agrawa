@@ -15,7 +15,7 @@ app_include_js = "agrawa.bundle.js"
 doctype_js = {
     "Customer": "public/js/custom_customer.js",
     "Sales Order": [
-        "public/js/custom_sales_order.js",
+        "public/js/sales_order.js",
         "public/js/bio_faktii_common.js"
     ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
@@ -28,7 +28,7 @@ doctype_js = {
         "public/js/sales_invoice.js",
         "public/js/bio_faktii_common.js"
     ],
-    "Sales Order": "public/js/sales_order.js",
+    # "Sales Order": "public/js/sales_order.js",
     "Print Format": "public/js/custom_print_format.js"
 
 }
@@ -40,6 +40,9 @@ doc_events = {
             "agrawa.overrides.custom_sales_invoice.set_sales_invoice_on_collective_sales_order"
         ],
         "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_collective_sales_order"
+    },
+    "Sales Order": {
+        "before_save": "agrawa.overrides.custom_sales_order.set_dropshipping_data"
     }
 }
 
