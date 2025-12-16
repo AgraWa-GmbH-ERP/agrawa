@@ -198,20 +198,20 @@
             <td class="text-right"><b>{{ format_currency(doc.total) }}</b></td>
         </tr>
          <!-- Tax Row -->
-        {% for item in doc.taxes %}
-        {% if item.base_tax_amount and item.base_tax_amount != 0 %}
+        {% for tax in doc.taxes %}
+        {% if tax.base_tax_amount and tax.base_tax_amount != 0 %}
             <tr>
             <td colspan="8" class="text-right">
                 <b>
-                {% if "19" in item.description %}
+                {% if "19" in tax.description %}
                     {{ _("Additional VAT 19%") }}
-                {% elif "7" in item.description %}
+                {% elif "7" in tax.description %}
                     {{ _("Additional VAT 7%") }}
                 {% endif %}
                 </b>
             </td>
             <td class="text-right">
-                <b>{{ format_currency(item.base_tax_amount) }}</b>
+                <b>{{ format_currency(tax.base_tax_amount) }}</b>
             </td>
             </tr>
         {% endif %}
