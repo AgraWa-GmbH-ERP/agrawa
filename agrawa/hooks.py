@@ -19,7 +19,7 @@ doctype_js = {
         "public/js/bio_faktii_common.js"
     ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
-    "Purchase Order": "public/js/custom_purchase_order.js",
+    # "Purchase Order": "public/js/custom_purchase_order.js",
     "Quotation": [
         "public/js/quotation.js",
         "public/js/bio_faktii_common.js",
