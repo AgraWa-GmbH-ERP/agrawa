@@ -14,17 +14,17 @@ def set_sales_invoice_on_collective_sales_order(doc, method):
 		if not item.get("custom_collective_sales_order") or not item.get("custom_collective_so_detail"):
 			continue
 		
-		so_item = frappe.get_doc("Sales Order Item", item.custom_collective_so_detail)
+		# so_item = frappe.get_doc("Sales Order Item", item.custom_collective_so_detail)
 				
-		if so_item.parent == item.custom_collective_sales_order and so_item.name == item.custom_collective_so_detail:
-			# Update the custom_individual_sales_invoice field
-			frappe.db.set_value(
-				"Sales Order Item",
-				item.custom_collective_so_detail,
-				"custom_individual_sales_invoice",
-				doc.name,
-				update_modified=False
-			)
+		# if so_item.parent == item.custom_collective_sales_order and so_item.name == item.custom_collective_so_detail:
+		# 	# Update the custom_individual_sales_invoice field
+		# 	frappe.db.set_value(
+		# 		"Sales Order Item",
+		# 		item.custom_collective_so_detail,
+		# 		"custom_individual_sales_invoice",
+		# 		doc.name,
+		# 		update_modified=False
+		# 	)
 
 
 @frappe.whitelist()
