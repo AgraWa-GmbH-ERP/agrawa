@@ -41,10 +41,14 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
         allocation_data.push({
             item_code: item.item_code,
             item_name: item.item_name,
-            // customer: customer,
             allocated_qty: item.qty,
             amount: item.amount,
-            so_detail: item.name
+            so_detail: item.name,
+            uom: item.uom,
+            stock_uom: item.stock_uom,
+            conversion_factor: item.conversion_factor,
+            warehouse: item.warehouse,
+            rate: item.rate
         });
     });
 
@@ -123,12 +127,13 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
             }
         ],
         primary_action: function() {
-            const allocations = this.get_values()['allocation_items'];            
+            const allocations = this.get_values()['allocation_items'];
+            const selected_allocations = allocations.filter(allocation => allocation?.__checked == 1 );
             frappe.call({
                 method: 'agrawa.api.add_alocations_and_create_invoice',
                 args: {
                     sales_order: frm.doc.name,
-                    allocations: allocations
+                    allocations: selected_allocations
                 },
                 callback: function(r) {
                     if (r.message) {
