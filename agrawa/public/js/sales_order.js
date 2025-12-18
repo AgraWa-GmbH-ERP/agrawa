@@ -3,33 +3,9 @@ frappe.provide("agrawa.sales_utils");
 frappe.ui.form.on('Sales Order', {
     refresh: function(frm) {
         if (frm.doc.docstatus === 1) {
-            let unique_customers = new Set();
-            if (frm.doc.items) {
-                frm.doc.items.forEach(item => {
-                    if (item.custom_customer) {
-                        unique_customers.add(item.custom_customer);
-                    }
-                });
-            }
-            if (unique_customers.size > 1) {
-                frm.add_custom_button(__('Split Invoice'), function() {
-                        frappe.call({
-                            method: 'agrawa.api.create_split_invoice',
-                            args: {
-                                sales_order: frm.doc.name
-                            },
-                            callback: function(response) {
-                                if (response.message && response.message.length > 0) {
-                                    let invoices = response.message.map(inv => `<a href="/app/sales-invoice/${inv}">${inv}</a>`).join(', ');
-                                    frappe.msgprint(__(`Invoices created: ${invoices}`));
-                                } else {
-                                    frappe.msgprint(__('No invoices were created.'));
-                                }
-                            }
-                    });
-                }, __('Create'));
-
-            }
+            frm.add_custom_button(__('Split Invoice'), function() {
+                agrawa.sales_utils.split_items_by_customer(frm);
+            });
             
         }
 
@@ -56,3 +32,115 @@ frappe.ui.form.on('Sales Order Item', {
         agrawa.sales_utils.show_qualification_dialog(frm, cdn, row.item_code, frm.doc.customer);
     }
 });
+
+agrawa.sales_utils.split_items_by_customer = function(frm) {
+
+    // Prepare table data for dialog
+    const allocation_data = [];
+    frm.doc.items.forEach(item => {
+        allocation_data.push({
+            item_code: item.item_code,
+            item_name: item.item_name,
+            // customer: customer,
+            allocated_qty: item.qty,
+            amount: item.amount,
+            so_detail: item.name
+        });
+    });
+
+    // Create dialog similar to update_child_items
+    const dialog = new frappe.ui.Dialog({
+        title: __('Split Items by Customer'),
+        size: 'extra-large',
+        fields: [
+            {
+                fieldname: 'allocation_items',
+                fieldtype: 'Table',
+                label: __('Item Allocation'),
+                cannot_add_rows: false,
+                in_place_edit: true,
+                data: allocation_data,
+                get_data: () => {
+                    return allocation_data;
+                },
+                fields: [
+                    {
+                        fieldtype: 'Link',
+                        fieldname: 'item_code',
+                        options: 'Item',
+                        in_list_view: 1,
+                        read_only: 1,
+                        label: __('Item Code')
+                    },
+                    {
+                        fieldtype: 'Data',
+                        fieldname: 'item_name',
+                        in_list_view: 1,
+                        read_only: 1,
+                        label: __('Item Name')
+                    },
+                    {
+                        fieldtype: 'Link',
+                        fieldname: 'customer',
+                        options: 'Customer',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Customer')
+                    },
+                    {
+                        fieldtype: 'Int',
+                        fieldname: 'allocated_qty',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Allocated Qty')
+                    },
+                    {
+                        fieldtype: 'Currency',
+                        fieldname: 'amount',
+                        in_list_view: 1,
+                        read_only: 0,
+                        reqd: 1,
+                        label: __('Amount')
+                    },
+                    {
+                        fieldtype: 'Data',
+                        fieldname: 'so_detail',
+                        read_only: 1,
+                        label: __('SO Detail'),
+                        hidden: 1
+                    },
+                    {
+                        fieldtype: 'Link',
+                        fieldname: 'sales_invoice',
+                        options: 'Sales Invoice',
+                        in_list_view: 1,
+                        read_only: 0,
+                        label: __('Sales Invoice')
+                    }
+                ]
+            }
+        ],
+        primary_action: function() {
+            const allocations = this.get_values()['allocation_items'];            
+            frappe.call({
+                method: 'agrawa.api.add_alocations_and_create_invoice',
+                args: {
+                    sales_order: frm.doc.name,
+                    allocations: allocations
+                },
+                callback: function(r) {
+                    if (r.message) {
+                        frappe.msgprint(__('Allocations saved successfully'));
+                        frm.reload_doc();
+                        dialog.hide();
+                    }
+                }
+            });
+        },
+        primary_action_label: __('Save Allocation')
+    });
+
+    dialog.show();
+};
