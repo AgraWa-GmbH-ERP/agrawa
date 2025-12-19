@@ -46,7 +46,6 @@ def add_alocations_and_create_invoice(sales_order, allocations):
 		del allocation["name"]
 	
 	so_doc = frappe.get_doc('Sales Order', sales_order)	
-	# so_doc.custom_item_allocation = []
 
 	for allocation in allocations:
 		si = frappe.new_doc("Sales Invoice")

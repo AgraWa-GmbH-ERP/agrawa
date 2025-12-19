@@ -35,7 +35,6 @@ frappe.ui.form.on('Sales Order Item', {
 
 agrawa.sales_utils.split_items_by_customer = function(frm) {
 
-    // Prepare table data for dialog
     const allocation_data = [];
     frm.doc.items.forEach(item => {
         allocation_data.push({
@@ -52,7 +51,6 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
         });
     });
 
-    // Create dialog similar to update_child_items
     const dialog = new frappe.ui.Dialog({
         title: __('Split Items by Customer'),
         size: 'extra-large',
