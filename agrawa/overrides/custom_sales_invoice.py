@@ -21,5 +21,3 @@ def unset_sales_invoice_on_sales_order_item_allocation(doc, method):
 			"Collective Order Allocation",
 			{"name": allocation.name, "parent": allocation.parent},
 		)
-		so_doc = frappe.get_doc("Sales Order", allocation.parent)
-		so_doc.save()

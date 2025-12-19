@@ -12,18 +12,18 @@ def set_dropshipping_data(doc, method):
 
 
 def validate_allocation_quantities(doc, method=None):
-	allocations_by_item = {}
+	allocations_by_so_detail = {}
 	
 	for allocation in doc.custom_item_allocation:
 		so_detail = allocation.so_detail
-		if so_detail not in allocations_by_item:
-			allocations_by_item[so_detail] = 0
-		allocations_by_item[so_detail] += allocation.allocated_qty
+		if so_detail not in allocations_by_so_detail:
+			allocations_by_so_detail[so_detail] = 0
+		allocations_by_so_detail[so_detail] += allocation.allocated_qty
 	
 	# Check each sales order item
 	for item in doc.items:
-		if item.name in allocations_by_item:
-			total_allocated = allocations_by_item[item.name]
+		if item.name in allocations_by_so_detail:
+			total_allocated = allocations_by_so_detail[item.name]
 			if total_allocated > item.qty:
 				frappe.throw(
 					f"Total allocated quantity ({total_allocated}) for item '{item.item_code}' "
