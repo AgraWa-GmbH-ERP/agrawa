@@ -58,8 +58,41 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 		target.run_method("set_missing_values")
 
+		default_ptct = frappe.db.get_value(
+			"Purchase Taxes and Charges Template",
+			{
+				"company": target.company,
+				"is_default": 1,
+				"disabled": 0,
+			},
+			"name",
+    	)
+		
+		if default_ptct:
+			target.taxes_and_charges = default_ptct
+			target.set("taxes", [])
+
+			ptct = frappe.get_doc("Purchase Taxes and Charges Template", default_ptct)
+
+			for t in ptct.taxes:
+				target.append("taxes", {
+					"charge_type": t.charge_type,
+					"account_head": t.account_head,
+					"description": t.description,
+					"rate": t.rate,
+					"tax_amount": 0,
+					"tax_amount_after_discount_amount": 0,
+					"cost_center": t.cost_center,
+					"included_in_print_rate": t.included_in_print_rate,
+					"included_in_paid_amount": t.included_in_paid_amount,
+					"add_deduct_tax": t.add_deduct_tax,
+					"category": t.category,
+					"row_id": t.row_id,
+				})
+
 		if not target.taxes:
-			target.append_taxes_from_item_tax_template()
+			# target.append_taxes_from_item_tax_template()
+			pass
 		target.run_method("calculate_taxes_and_totals")
 
 	def update_item(source, target, source_parent):
