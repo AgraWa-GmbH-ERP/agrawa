@@ -61,7 +61,8 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 fieldname: 'allocation_items',
                 fieldtype: 'Table',
                 label: __('Item Allocation'),
-                cannot_add_rows: false,
+                cannot_add_rows: true,
+                cannot_delete_rows: true,
                 in_place_edit: true,
                 data: allocation_data,
                 get_data: () => {
@@ -129,6 +130,11 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
         primary_action: function() {
             const allocations = this.get_values()['allocation_items'];
             const selected_allocations = allocations.filter(allocation => allocation?.__checked == 1 );
+            if (selected_allocations.length === 0) {
+                frappe.msgprint(__('Please select at least one allocation to proceed.'));
+                return;
+            }
+
             frappe.call({
                 method: 'agrawa.api.add_alocations_and_create_invoice',
                 args: {
