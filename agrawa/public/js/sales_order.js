@@ -137,14 +137,14 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 },
                 callback: function(r) {
                     if (r.message) {
-                        frappe.msgprint(__('Allocations saved successfully'));
+                        frappe.msgprint(__('Invoices created and allocations added to Sales Order.'));
                         frm.reload_doc();
                         dialog.hide();
                     }
                 }
             });
         },
-        primary_action_label: __('Save Allocation')
+        primary_action_label: __('Allocate and Create Invoices')
     });
 
     dialog.show();
