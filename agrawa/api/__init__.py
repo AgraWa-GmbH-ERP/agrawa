@@ -1,5 +1,6 @@
 import json
 import frappe
+from agrawa.overrides.custom_sales_order import validate_allocation_quantities
 
 
 @frappe.whitelist()
@@ -45,7 +46,7 @@ def add_alocations_and_create_invoice(sales_order, allocations):
 		del allocation["name"]
 	
 	so_doc = frappe.get_doc('Sales Order', sales_order)	
-	so_doc.custom_item_allocation = []
+	# so_doc.custom_item_allocation = []
 
 	for allocation in allocations:
 		si = frappe.new_doc("Sales Invoice")
@@ -84,6 +85,8 @@ def add_alocations_and_create_invoice(sales_order, allocations):
 		allocation["sales_invoice"] = si.name
 		
 		so_doc.append('custom_item_allocation', allocation)
+
+	validate_allocation_quantities(so_doc)
 
 	so_doc.save()
 
