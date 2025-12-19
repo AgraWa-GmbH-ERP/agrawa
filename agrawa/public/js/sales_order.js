@@ -35,20 +35,22 @@ frappe.ui.form.on('Sales Order Item', {
 
 agrawa.sales_utils.split_items_by_customer = function(frm) {
 
-    // Prepare table data for dialog
     const allocation_data = [];
     frm.doc.items.forEach(item => {
         allocation_data.push({
             item_code: item.item_code,
             item_name: item.item_name,
-            // customer: customer,
             allocated_qty: item.qty,
             amount: item.amount,
-            so_detail: item.name
+            so_detail: item.name,
+            uom: item.uom,
+            stock_uom: item.stock_uom,
+            conversion_factor: item.conversion_factor,
+            warehouse: item.warehouse,
+            rate: item.rate
         });
     });
 
-    // Create dialog similar to update_child_items
     const dialog = new frappe.ui.Dialog({
         title: __('Split Items by Customer'),
         size: 'extra-large',
@@ -57,7 +59,8 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 fieldname: 'allocation_items',
                 fieldtype: 'Table',
                 label: __('Item Allocation'),
-                cannot_add_rows: false,
+                cannot_add_rows: true,
+                cannot_delete_rows: true,
                 in_place_edit: true,
                 data: allocation_data,
                 get_data: () => {
@@ -123,23 +126,29 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
             }
         ],
         primary_action: function() {
-            const allocations = this.get_values()['allocation_items'];            
+            const allocations = this.get_values()['allocation_items'];
+            const selected_allocations = allocations.filter(allocation => allocation?.__checked == 1 );
+            if (selected_allocations.length === 0) {
+                frappe.msgprint(__('Please select at least one allocation to proceed.'));
+                return;
+            }
+
             frappe.call({
                 method: 'agrawa.api.add_alocations_and_create_invoice',
                 args: {
                     sales_order: frm.doc.name,
-                    allocations: allocations
+                    allocations: selected_allocations
                 },
                 callback: function(r) {
                     if (r.message) {
-                        frappe.msgprint(__('Allocations saved successfully'));
+                        frappe.msgprint(__('Invoices created and allocations added to Sales Order.'));
                         frm.reload_doc();
                         dialog.hide();
                     }
                 }
             });
         },
-        primary_action_label: __('Save Allocation')
+        primary_action_label: __('Allocate and Create Invoices')
     });
 
     dialog.show();
