@@ -81,22 +81,21 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 		target.run_method("calculate_taxes_and_totals")
 		target.run_method("set_use_serial_batch_fields")
 
-		# # Set address details based on customer
-		# if allocation["customer"] == source.customer:
-		# 	if source.customer_address:
-		# 		target.customer_address = source.customer_address
-		# 	if source.contact_person:
-		# 		target.contact_person = source.contact_person
-		# 	if source.shipping_address_name:
-		# 		target.shipping_address_name = source.shipping_address_name
+		if allocation["customer"] == source.customer:
+			if source.customer_address:
+				target.customer_address = source.customer_address
+			if source.contact_person:
+				target.contact_person = source.contact_person
+			if source.shipping_address_name:
+				target.shipping_address_name = source.shipping_address_name
 		
-		# if source.company_address:
-		# 	target.update({"company_address": source.company_address})
-		# else:
-		# 	target.update(get_company_address(target.company))
+		if source.company_address:
+			target.update({"company_address": source.company_address})
+		else:
+			target.update(get_company_address(target.company))
 
-		# if target.company_address:
-		# 	target.update(get_fetch_values("Sales Invoice", "company_address", target.company_address))
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", "company_address", target.company_address))
 
 		target.debit_to = get_party_account("Customer", target.customer, source.company)
 
@@ -124,7 +123,7 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 					"party_account_currency": "party_account_currency",
 					"payment_terms_template": "payment_terms_template",
 				},
-				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name"],
+				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address"],
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Sales Order Item": {
