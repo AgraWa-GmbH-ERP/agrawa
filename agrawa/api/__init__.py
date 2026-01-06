@@ -128,10 +128,6 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 			},
 			"Sales Order Item": {
 				"doctype": "Sales Invoice Item",
-				# "field_map": {
-				# 	"name": "so_detail",
-				# 	"parent": "sales_order",
-				# },
 				"postprocess": update_item,
 				"condition": lambda doc: should_map_item(doc),
 			},
