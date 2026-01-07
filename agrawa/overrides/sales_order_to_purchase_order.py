@@ -104,7 +104,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"item_tax_template",
 					"discount_percentage",
 					"discount_amount",
-					"supplier",
+					# "supplier", # commented as prices were not being picked up if either of parent doc and item have supplier missing  
 					"pricing_rules",
 				],
 				"postprocess": update_item,
@@ -140,6 +140,8 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 
 	set_delivery_date(doc.items, source_name)
 	doc.set_onload("load_after_mapping", False)
+	doc.run_method("set_missing_values")
+	frappe.msgprint("supplier: {}".format(doc.supplier))
 
 	return doc
 
