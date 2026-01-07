@@ -137,7 +137,7 @@ def make_purchase_order(source_name, selected_items=None, target_doc=None):
 					"item_tax_template",
 					"discount_percentage",
 					"discount_amount",
-					"supplier",
+					# "supplier", # commented as prices were not being picked up if either of parent doc and item have supplier missing  
 					"pricing_rules",
 				],
 				"postprocess": update_item,
