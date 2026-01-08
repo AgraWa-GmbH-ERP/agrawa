@@ -25,7 +25,4 @@ def validate_allocation_quantities(doc, method=None):
 		if item.name in allocations_by_so_detail:
 			total_allocated = allocations_by_so_detail[item.name]
 			if total_allocated > item.qty:
-				frappe.throw(
-					f"Total allocated quantity ({total_allocated}) for item '{item.item_code}' "
-					f"exceeds the ordered quantity ({item.qty}) in Sales Order Item {item.item_code} on row {item.idx}."
-				)
+				frappe.throw("Total allocated quantity is {} for {} exceeds the ordered quantity {} on row {} in Items table".format(frappe.bold(total_allocated), frappe.get_desk_link("Item", item.item_code), frappe.bold(item.qty), item.idx))
