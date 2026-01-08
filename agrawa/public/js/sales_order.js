@@ -211,8 +211,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 },
                 callback: function(r) {
                     if (r.message) {
-                        frappe.msgprint(__('Invoices created and allocations added to Sales Order.'));
-                        frm.reload_doc();
+                        frappe.set_route('List', 'Sales Invoice');
                         dialog.hide();
                     }
                 }
