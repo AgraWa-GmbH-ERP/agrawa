@@ -134,7 +134,30 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         columns: 1,
                         read_only: 0,
                         reqd: 1,
-                        label: __('Allocated Qty')
+                        label: __('Allocated Qty'),
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const allocated_qty = this.get_value() || 0;
+                            const rate = grid_row.doc.rate || 0;
+                            grid_row.doc.amount = allocated_qty * rate;
+                            grid_row.refresh();
+                        }
+                    },
+                    {
+                        fieldtype: 'Currency',
+                        fieldname: 'rate',
+                        in_list_view: 1,
+                        columns: 1,
+                        read_only: 1,
+                        reqd: 1,
+                        label: __('Rate'),
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const allocated_qty = grid_row.doc.allocated_qty || 0;
+                            const rate = this.get_value() || 0;
+                            grid_row.doc.amount = allocated_qty * rate;
+                            grid_row.refresh();
+                        }
                     },
                     {
                         fieldtype: 'Currency',
