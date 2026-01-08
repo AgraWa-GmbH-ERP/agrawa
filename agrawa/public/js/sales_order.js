@@ -59,8 +59,6 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 fieldname: 'allocation_items',
                 fieldtype: 'Table',
                 label: __('Item Allocation'),
-                cannot_add_rows: true,
-                cannot_delete_rows: true,
                 in_place_edit: true,
                 data: allocation_data,
                 get_data: () => {
@@ -72,13 +70,50 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'item_code',
                         options: 'Item',
                         in_list_view: 1,
-                        read_only: 1,
-                        label: __('Item Code')
+                        columns: 2,
+                        label: __('Item Code'),
+                        get_query: function() {
+                            const valid_items = frm.doc.items.map(item => item.item_code);
+                            return {
+                                filters: {
+                                    'name': ['in', valid_items]
+                                }
+                            };
+                        },
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const item_code = this.get_value();
+                            
+                            if (!item_code) return;
+                            
+                            // Find the item in the sales order
+                            const so_item = frm.doc.items.find(item => item.item_code === item_code);
+                            
+                            if (so_item) {
+                                // Populate item_name and so_detail
+                                grid_row.doc.item_name = so_item.item_name;
+                                grid_row.doc.so_detail = so_item.name;
+                                grid_row.doc.uom = so_item.uom;
+                                grid_row.doc.stock_uom = so_item.stock_uom;
+                                grid_row.doc.conversion_factor = so_item.conversion_factor;
+                                grid_row.doc.warehouse = so_item.warehouse;
+                                grid_row.doc.rate = so_item.rate;
+                                grid_row.refresh();
+                            } else {
+                                // Item not in current sales order
+                                frappe.msgprint(__('Selected item is not in the current Sales Order. Please select a valid item.'));
+                                grid_row.doc.item_code = '';
+                                grid_row.doc.item_name = '';
+                                grid_row.doc.so_detail = '';
+                                grid_row.refresh();
+                            }
+                        }
                     },
                     {
                         fieldtype: 'Data',
                         fieldname: 'item_name',
                         in_list_view: 1,
+                        columns: 3,
                         read_only: 1,
                         label: __('Item Name')
                     },
@@ -87,6 +122,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'customer',
                         options: 'Customer',
                         in_list_view: 1,
+                        columns: 2,
                         read_only: 0,
                         reqd: 1,
                         label: __('Customer')
@@ -95,14 +131,39 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldtype: 'Int',
                         fieldname: 'allocated_qty',
                         in_list_view: 1,
+                        columns: 1,
                         read_only: 0,
                         reqd: 1,
-                        label: __('Allocated Qty')
+                        label: __('Allocated Qty'),
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const allocated_qty = this.get_value() || 0;
+                            const rate = grid_row.doc.rate || 0;
+                            grid_row.doc.amount = allocated_qty * rate;
+                            grid_row.refresh();
+                        }
+                    },
+                    {
+                        fieldtype: 'Currency',
+                        fieldname: 'rate',
+                        in_list_view: 1,
+                        columns: 1,
+                        read_only: 1,
+                        reqd: 1,
+                        label: __('Rate'),
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const allocated_qty = grid_row.doc.allocated_qty || 0;
+                            const rate = this.get_value() || 0;
+                            grid_row.doc.amount = allocated_qty * rate;
+                            grid_row.refresh();
+                        }
                     },
                     {
                         fieldtype: 'Currency',
                         fieldname: 'amount',
                         in_list_view: 1,
+                        columns: 1,
                         read_only: 0,
                         reqd: 1,
                         label: __('Amount')
@@ -119,6 +180,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'sales_invoice',
                         options: 'Sales Invoice',
                         in_list_view: 1,
+                        columns: 2,
                         read_only: 0,
                         label: __('Sales Invoice')
                     }
@@ -131,6 +193,14 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
             if (selected_allocations.length === 0) {
                 frappe.msgprint(__('Please select at least one allocation to proceed.'));
                 return;
+            }
+
+            // add validation that ensure that customer is set for each allocation
+            for (let allocation of selected_allocations) {
+                if (!allocation.customer) {
+                    frappe.msgprint(__('Please set Customer for all selected allocations.'));
+                    return;
+                }
             }
 
             frappe.call({

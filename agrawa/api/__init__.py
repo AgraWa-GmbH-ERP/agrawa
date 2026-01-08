@@ -146,6 +146,5 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 	)
 	
 	si.save()
-	si.submit()
 	
 	return si
