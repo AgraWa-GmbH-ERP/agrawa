@@ -59,8 +59,6 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 fieldname: 'allocation_items',
                 fieldtype: 'Table',
                 label: __('Item Allocation'),
-                cannot_add_rows: true,
-                cannot_delete_rows: true,
                 in_place_edit: true,
                 data: allocation_data,
                 get_data: () => {
@@ -72,13 +70,13 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'item_code',
                         options: 'Item',
                         in_list_view: 1,
-                        read_only: 1,
-                        label: __('Item Code')
+                        columns: 2,
                     },
                     {
                         fieldtype: 'Data',
                         fieldname: 'item_name',
                         in_list_view: 1,
+                        columns: 3,
                         read_only: 1,
                         label: __('Item Name')
                     },
@@ -87,6 +85,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'customer',
                         options: 'Customer',
                         in_list_view: 1,
+                        columns: 2,
                         read_only: 0,
                         reqd: 1,
                         label: __('Customer')
@@ -95,6 +94,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldtype: 'Int',
                         fieldname: 'allocated_qty',
                         in_list_view: 1,
+                        columns: 1,
                         read_only: 0,
                         reqd: 1,
                         label: __('Allocated Qty')
@@ -103,6 +103,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldtype: 'Currency',
                         fieldname: 'amount',
                         in_list_view: 1,
+                        columns: 1,
                         read_only: 0,
                         reqd: 1,
                         label: __('Amount')
@@ -119,6 +120,7 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         fieldname: 'sales_invoice',
                         options: 'Sales Invoice',
                         in_list_view: 1,
+                        columns: 2,
                         read_only: 0,
                         label: __('Sales Invoice')
                     }
