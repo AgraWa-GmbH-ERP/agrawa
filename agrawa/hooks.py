@@ -38,7 +38,8 @@ doc_events = {
         "on_submit": [
             "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing"
         ],
-        "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation"
+        "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation",
+        "on_trash": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation"
     },
     "Sales Order": {
         "before_save": "agrawa.overrides.custom_sales_order.set_dropshipping_data"
