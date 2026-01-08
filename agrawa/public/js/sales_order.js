@@ -71,6 +71,43 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         options: 'Item',
                         in_list_view: 1,
                         columns: 2,
+                        label: __('Item Code'),
+                        get_query: function() {
+                            const valid_items = frm.doc.items.map(item => item.item_code);
+                            return {
+                                filters: {
+                                    'name': ['in', valid_items]
+                                }
+                            };
+                        },
+                        onchange: function() {
+                            const grid_row = this.grid_row;
+                            const item_code = this.get_value();
+                            
+                            if (!item_code) return;
+                            
+                            // Find the item in the sales order
+                            const so_item = frm.doc.items.find(item => item.item_code === item_code);
+                            
+                            if (so_item) {
+                                // Populate item_name and so_detail
+                                grid_row.doc.item_name = so_item.item_name;
+                                grid_row.doc.so_detail = so_item.name;
+                                grid_row.doc.uom = so_item.uom;
+                                grid_row.doc.stock_uom = so_item.stock_uom;
+                                grid_row.doc.conversion_factor = so_item.conversion_factor;
+                                grid_row.doc.warehouse = so_item.warehouse;
+                                grid_row.doc.rate = so_item.rate;
+                                grid_row.refresh();
+                            } else {
+                                // Item not in current sales order
+                                frappe.msgprint(__('Selected item is not in the current Sales Order. Please select a valid item.'));
+                                grid_row.doc.item_code = '';
+                                grid_row.doc.item_name = '';
+                                grid_row.doc.so_detail = '';
+                                grid_row.refresh();
+                            }
+                        }
                     },
                     {
                         fieldtype: 'Data',
