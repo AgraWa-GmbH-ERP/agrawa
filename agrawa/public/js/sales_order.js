@@ -195,6 +195,14 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                 return;
             }
 
+            // add validation that ensure that customer is set for each allocation
+            for (let allocation of selected_allocations) {
+                if (!allocation.customer) {
+                    frappe.msgprint(__('Please set Customer for all selected allocations.'));
+                    return;
+                }
+            }
+
             frappe.call({
                 method: 'agrawa.api.add_alocations_and_create_invoice',
                 args: {
