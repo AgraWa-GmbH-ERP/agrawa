@@ -1,3 +1,5 @@
+frappe.provide("agrawa.bio_faktii");
+
 const BIO_TEXT =
     '* für die ökologische Produktion / Landwirtschaft zugelassen EU-ÖkoVO (EG-VO Nr.: 2018/848)';
 const FAKTII_TEXT =
@@ -45,26 +47,9 @@ frappe.ui.form.on(cur_frm.doctype, {
 function attach_bio_faktii_behavior(parentDoctype, childDoctype) {
     frappe.ui.form.on(childDoctype, {
         async item_code(frm, cdt, cdn) {
-            const row = locals[cdt][cdn];
-            if (!row?.item_code) return;
-
             setTimeout(async () => {
-                const { message: item } = await frappe.db.get_value(
-                    'Item',
-                    row.item_code,
-                    ['custom_is_bio', 'custom_is_faktii_e12', 'item_name']
-                );
-                if (!item) return;
-
-                setTimeout(() => {
-                    const clean_name = item.item_name.replace(/\*+$/, '').trim();
-                    const new_name = item.custom_is_bio ? `${clean_name} *` : item.custom_is_faktii_e12 ? `${clean_name} **` : clean_name;
-
-                    frappe.model.set_value(cdt, cdn, 'item_name', new_name);
-                    frm.fields_dict.items.grid.refresh_row(cdn);
-
-                    update_terms_field(frm);
-                }, 250);
+                await apply_bio_faktii_marker_to_row(frm, cdt, cdn);
+                update_terms_field(frm);
             }, 100);
         },
 
@@ -106,6 +91,29 @@ async function update_terms_field(frm) {
     frm.refresh_field('terms');
 }
 
+
+async function apply_bio_faktii_marker_to_row(frm, cdt, cdn) {
+    const row = locals[cdt][cdn];
+    if (!row?.item_code) return;
+
+    const { message: item } = await frappe.db.get_value(
+        "Item",
+        row.item_code,
+        ["custom_is_bio", "custom_is_faktii_e12", "item_name"]
+    );
+    if (!item) return;
+
+    const clean_name = (item.item_name || "").replace(/\*+$/, "").trim();
+    const new_name = item.custom_is_bio
+        ? `${clean_name} *`
+        : item.custom_is_faktii_e12
+            ? `${clean_name} **`
+            : clean_name;
+
+    frappe.model.set_value(cdt, cdn, "item_name", new_name);
+    frm.fields_dict.items.grid.refresh_row(cdn);
+}
+
 async function clear_terms_lines(frm, lines) {
     let terms = frm.doc.terms || '';
     let split_lines = terms.split(/<br\s*\/?>/i).map(t => t.trim()).filter(Boolean);
@@ -115,3 +123,6 @@ async function clear_terms_lines(frm, lines) {
     await frm.set_value('terms', terms);
     frm.refresh_field('terms');
 }
+
+agrawa.bio_faktii.update_terms_field = update_terms_field;
+agrawa.bio_faktii.apply_bio_faktii_marker_to_row = apply_bio_faktii_marker_to_row;
