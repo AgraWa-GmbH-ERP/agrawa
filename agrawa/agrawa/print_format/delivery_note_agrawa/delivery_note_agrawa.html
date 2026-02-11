@@ -1,0 +1,141 @@
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
+{{ render_letter_head(letter_head) }}
+
+{% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
+
+<!-- Address + Company info section -->
+<div class="company-and-address-info">
+
+    <!-- Left side (address block inside window) -->
+    <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
+        <span style="color: #B2160E;">AgraWa GmbH</span> 
+        <span style="color: 83AD29;">|</span> 
+        <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
+        <span style="color: 83AD29;">|</span> 
+        <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
+        
+        <div style="margin-top: 0.2cm;">
+            <strong>{{ doc.customer_name }}</strong><br>
+            {% if doc.address_display %}
+                {{ doc.address_display }}
+            {% endif %}
+        </div>
+    </div>
+
+    {{ render_company_block() }}
+</div>
+
+<!-- BODY Wrapper -->
+<div class="body-wrapper">
+
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <!-- Left side -->
+        <h1><b>Lieferschein</b></h1>
+
+        <!-- Right side -->
+        <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
+            <b>Angebotsnr.: </b>{{doc.name}}<br>
+            <b>Angebotsdatum: </b>{{doc.posting_date}}<br>
+            {% if doc.custom_dispatch_date %}
+                <b>Lieferdatum: </b>{{ doc.custom_dispatch_date }}<br>
+            {% endif %}
+            <b>Kundennr.: </b>{{doc.customer }}<br>
+            <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>+49 176 17942780<br>
+        </div>
+    </div>
+    <br>
+
+    {% if doc.contact_person %}
+        {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
+        Sehr geehrter {{contact.salutation or ""}} {{ contact.last_name or "" }},
+    {% else %}
+        Sehr geehrter Damen und Herren,
+    {% endif %}
+
+    <br>
+    {% set sales_orders = [] %}
+        {% for item in doc.items %}
+            {% if item.against_sales_order and item.against_sales_order not in sales_orders %}
+                {% set _ = sales_orders.append(item.against_sales_order) %}
+            {% endif %}
+        {% endfor %}
+    vielen Dank für Ihr Vertrauen. Heute liefern wir ihre Ware gemäß Ihres Auftrages {{ sales_orders | join(", ") }}.
+    <br><br>
+
+    <table class=" table-sm pricetable" >
+	<thead>
+        <tr class="">
+            <th style="width:1.1cm;">{{ _("Pos") }}</th>
+            <th style="width:3.0cm;">{{ _("Item Name") }}</th>
+            <th style="width:3.0cm;">{{ _("Description") }}</th>
+            <th style="width:1.5cm;">{{ _("Packing Unit") }}</th>
+            <th style="width:1.5cm;">{{ _("Item Number") }}</th>
+            <th style="width:1.5cm;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:1.0cm;" class="text-right">{{ _("Pricing Unit") }}</th>
+        </tr>
+	</thead>
+    <tbody>
+        {% for item in doc.items %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>{{ item.item_name or '' }}</td>
+            <td>{{ item.description or '' }}</td>
+            <td>{{ frappe.db.get_value("Item", item.item_code, "custom_packaging_unit") or '' }}</td>
+            <td>{{ item.item_code }}</td>
+            <td class="text-right">{{ item.qty }}</td>
+            <td>{{ item.stock_uom or '' }}</td>
+        </tr>
+        {% endfor %}
+
+    </tbody>
+</table>
+
+    <br>
+    <div style="page-break-inside: avoid;">
+        <p>
+            <b>{{ doc.tc_name or '' }}</b><br>
+            {{ doc.terms or ''}}
+        </p>
+    </div>
+    <br>
+    <!-- Greeting -->
+    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
+        Bei Rückfragen stehen wir selbstverständlich jederzeit gerne zur Verfügung. <br>
+        Mit freundlichen Grüßen:<br> 
+        {% if user_details %}
+            {% if user_details.signature %}
+                <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
+                    <img src="{{ user_details.signature }}" alt="Logo" style="width: 150px; height: auto;">
+                </div>
+            {% endif %}
+            {{ user_details.full_name if user_details.full_name else '' }}
+        {% endif %}  
+    </div>
+
+</div>
+
+    <br>
+{{ render_footer(footer) }}
+{{ render_shared_styles() }}
+
+<style>
+.pricetable thead th {
+  background: #f0f0f0;
+  font-weight: bold;
+}
+
+.print-format h1, 
+.print-format h1 * {
+  font-size: 18px !important;
+  color: #B2160E;
+  margin: 0;
+  letter-spacing: 2px;
+}
+
+  .pricetable th:nth-child(1), .pricetable td:nth-child(1) { width: 1cm; }
+  .pricetable th:nth-child(4), .pricetable td:nth-child(4) { width: 1.5cm; }
+  .pricetable th:nth-child(5), .pricetable td:nth-child(5) { width: 1.5cm; }
+  .pricetable th:nth-child(6), .pricetable td:nth-child(6) { width: 2cm; text-align: right; }
+  .pricetable th:nth-child(7), .pricetable td:nth-child(7) { width: 1.5cm; text-align: right; }
+
+</style>
