@@ -31,7 +31,7 @@ def make_purchase_order_item_supplier(source_name, target_doc=None):
 		supplier = args.get("supplier")
 
 		if not supplier:
-			frappe.throw("❌ Supplier not received in postprocess")
+			frappe.throw("❌ Supplier not Available")
 
 		target.supplier = supplier
 

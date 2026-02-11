@@ -1,20 +1,3 @@
-frappe.ui.form.on("Material Request Item", {
-	item_code(frm, cdt, cdn) {
-		const row = locals[cdt][cdn];
-		if (!row.item_code) return;
-
-		frappe.db.get_value(
-			"Item Supplier",
-			{ parent: row.item_code },
-			"supplier"
-		).then(r => {
-			if (r.message && r.message.supplier) {
-				frappe.model.set_value(cdt, cdn, "supplier", r.message.supplier);
-			}
-		});
-	}
-});
-
 frappe.ui.form.on("Material Request", {
     make_purchase_order(frm) {
         frappe.prompt(
