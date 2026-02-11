@@ -14,6 +14,7 @@ app_include_js = "agrawa.bundle.js"
 
 doctype_js = {
     "Customer": "public/js/custom_customer.js",
+    "Material Request": "public/js/custom_material_request.js",
     "Sales Order": [
         "public/js/sales_order.js",
         "public/js/bio_faktii_common.js"
