@@ -50,17 +50,19 @@ def add_alocations_and_create_invoice(sales_order, allocations):
 	
 	so_doc = frappe.get_doc('Sales Order', sales_order)	
 
+	created_invoices = []
 	for allocation in allocations:
 		# Create Sales Invoice using get_mapped_doc
 		si = create_sales_invoice_from_allocation(so_doc, allocation)
 		
 		allocation["sales_invoice"] = si.name
+		created_invoices.append(si.name)
 		so_doc.append('custom_item_allocation', allocation)
 
 	validate_allocation_quantities(so_doc)
 	so_doc.save()
 
-	return {"sales_order": sales_order, "allocations_added": len(allocations)}
+	return {"sales_order": sales_order, "allocations_added": len(allocations), "created_invoices": created_invoices}
 
 
 def create_sales_invoice_from_allocation(so_doc, allocation):
@@ -123,7 +125,7 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 					"party_account_currency": "party_account_currency",
 					"payment_terms_template": "payment_terms_template",
 				},
-				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address", "contact_person"],
+				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address", "contact_person", "contact_display"],
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Sales Order Item": {
