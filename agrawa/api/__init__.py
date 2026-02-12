@@ -123,7 +123,7 @@ def create_sales_invoice_from_allocation(so_doc, allocation):
 					"party_account_currency": "party_account_currency",
 					"payment_terms_template": "payment_terms_template",
 				},
-				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address"],
+				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address", "contact_person"],
 				"validation": {"docstatus": ["=", 1]},
 			},
 			"Sales Order Item": {
