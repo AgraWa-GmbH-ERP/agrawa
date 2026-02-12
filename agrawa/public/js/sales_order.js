@@ -185,6 +185,46 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         label: __('Sales Invoice')
                     }
                 ]
+            },
+            {
+                fieldtype: 'Button',
+                fieldname: 'update_item_details',
+                label: __('Update Item Details'),
+                click: function() {
+                    const allocation_items = dialog.get_value('allocation_items') || [];
+                    
+                    allocation_items.forEach((allocation, index) => {
+                        if (allocation.item_code) {
+                            // Find the corresponding item in sales order
+                            const so_item = frm.doc.items.find(item => item.item_code === allocation.item_code);
+                            
+                            if (so_item) {
+                                // Update the allocation data
+                                allocation.item_name = so_item.item_name;
+                                allocation.so_detail = so_item.name;
+                                allocation.rate = so_item.rate;
+                                allocation.uom = so_item.uom;
+                                allocation.stock_uom = so_item.stock_uom;
+                                allocation.conversion_factor = so_item.conversion_factor;
+                                allocation.warehouse = so_item.warehouse;
+                                
+                                // Recalculate amount if allocated_qty is set
+                                if (allocation.allocated_qty) {
+                                    allocation.amount = allocation.allocated_qty * so_item.rate;
+                                }
+                            }
+                        }
+                    });
+                    
+                    // Refresh the table
+                    dialog.set_value('allocation_items', allocation_items);
+                    dialog.get_field('allocation_items').grid.refresh();
+                    
+                    frappe.show_alert({
+                        message: __('Item data fetched successfully'),
+                        indicator: 'green'
+                    });
+                }
             }
         ],
         primary_action: function() {
