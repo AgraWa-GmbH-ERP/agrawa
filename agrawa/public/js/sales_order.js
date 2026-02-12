@@ -214,6 +214,13 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         frappe.msgprint(__('Invoices created and allocations added to Sales Order.'));
                         frm.reload_doc();
                         dialog.hide();
+                        
+                        // Route to Sales Invoice list filtered by created invoices
+                        if (r.message.created_invoices && r.message.created_invoices.length > 0) {
+                            frappe.set_route('List', 'Sales Invoice', {
+                                'name': ['in', r.message.created_invoices]
+                            });
+                        }
                     }
                 }
             });
