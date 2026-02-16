@@ -23,13 +23,7 @@
   "total_amount",
   "column_break_amounts",
   "currency",
-  "status",
-  "section_break_tracking",
-  "total_sales_orders",
-  "invoiced_sales_orders",
-  "column_break_tracking",
-  "percent_invoiced",
-  "amended_from"
+  "status"
  ],
  "fields": [
   {
@@ -138,55 +132,11 @@
    "in_standard_filter": 1,
    "label": "Status",
    "options": "\nDraft\nOpen\nPO Created\nDelivered\nPartially Invoiced\nCompleted\nCancelled"
-  },
-  {
-   "collapsible": 1,
-   "fieldname": "section_break_tracking",
-   "fieldtype": "Section Break",
-   "label": "Invoicing Progress"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "total_sales_orders",
-   "fieldtype": "Int",
-   "label": "Total Sales Orders",
-   "read_only": 1
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "invoiced_sales_orders",
-   "fieldtype": "Int",
-   "label": "Invoiced Sales Orders",
-   "read_only": 1
-  },
-  {
-   "fieldname": "column_break_tracking",
-   "fieldtype": "Column Break"
-  },
-  {
-   "allow_on_submit": 1,
-   "default": "0",
-   "fieldname": "percent_invoiced",
-   "fieldtype": "Percent",
-   "label": "Percent Invoiced",
-   "read_only": 1
-  },
-  {
-   "fieldname": "amended_from",
-   "fieldtype": "Link",
-   "label": "Amended From",
-   "no_copy": 1,
-   "options": "Collective Sales Order",
-   "print_hide": 1,
-   "read_only": 1
   }
  ],
  "index_web_pages_for_search": 1,
- "is_submittable": 1,
  "links": [],
- "modified": "2026-02-16 12:23:22.756909",
+ "modified": "2026-02-16 12:52:02.512065",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",
@@ -206,8 +156,6 @@
    "write": 1
   },
   {
-   "amend": 1,
-   "cancel": 1,
    "create": 1,
    "delete": 1,
    "email": 1,
@@ -217,7 +165,6 @@
    "report": 1,
    "role": "Sales Manager",
    "share": 1,
-   "submit": 1,
    "write": 1
   },
   {
