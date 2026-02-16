@@ -76,8 +76,7 @@
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
-   "options": "Purchase Order",
-   "read_only": 1
+   "options": "Purchase Order"
   },
   {
    "fieldname": "column_break_purchase",
@@ -136,7 +135,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-16 12:52:02.512065",
+ "modified": "2026-02-16 13:00:50.352622",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",
