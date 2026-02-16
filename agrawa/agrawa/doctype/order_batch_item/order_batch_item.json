@@ -1,0 +1,113 @@
+{
+ "actions": [],
+ "allow_rename": 1,
+ "creation": "2026-02-16 10:10:10",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "sales_order",
+  "sales_order_date",
+  "customer",
+  "customer_name",
+  "column_break_1",
+  "grand_total",
+  "invoicing_status",
+  "section_break_pickup",
+  "picked_up",
+  "pickup_date",
+  "column_break_pickup",
+  "remarks"
+ ],
+ "fields": [
+  {
+   "fieldname": "sales_order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Sales Order",
+   "options": "Sales Order",
+   "reqd": 1
+  },
+  {
+   "fetch_from": "sales_order.transaction_date",
+   "fieldname": "sales_order_date",
+   "fieldtype": "Date",
+   "in_list_view": 1,
+   "label": "Sales Order Date",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.customer",
+   "fieldname": "customer",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Customer",
+   "options": "Customer",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.customer_name",
+   "fieldname": "customer_name",
+   "fieldtype": "Data",
+   "label": "Customer Name",
+   "read_only": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fetch_from": "sales_order.grand_total",
+   "fieldname": "grand_total",
+   "fieldtype": "Currency",
+   "label": "Grand Total",
+   "read_only": 1
+  },
+  {
+   "fetch_from": "sales_order.billing_status",
+   "fieldname": "invoicing_status",
+   "fieldtype": "Data",
+   "label": "Invoicing Status",
+   "read_only": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_pickup",
+   "fieldtype": "Section Break",
+   "label": "Pickup Details"
+  },
+  {
+   "default": "0",
+   "fieldname": "picked_up",
+   "fieldtype": "Check",
+   "label": "Picked Up"
+  },
+  {
+   "depends_on": "eval:doc.picked_up==1",
+   "fieldname": "pickup_date",
+   "fieldtype": "Date",
+   "label": "Pickup Date"
+  },
+  {
+   "fieldname": "column_break_pickup",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "remarks",
+   "fieldtype": "Small Text",
+   "label": "Remarks"
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-12 10:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Agrawa",
+ "name": "Order Batch Item",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
