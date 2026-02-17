@@ -5,7 +5,6 @@ frappe.ui.form.on('Collective Sales Order', {
 	refresh: function(frm) {
 		erpnext.hide_company(frm);
 		
-		// Show 'Fetch Sales Orders' button for new/unsaved CSO or CSO without purchase order
 		if (frm.is_new() || !frm.doc.purchase_order) {
 			frm.add_custom_button(__('Fetch Sales Orders'), function() {
 				show_fetch_sales_orders_dialog(frm);
