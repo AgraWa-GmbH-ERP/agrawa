@@ -9,6 +9,109 @@ from frappe.utils import flt, get_link_to_form
 
 class CollectiveSalesOrder(Document):
 	pass
+	def validate(self):
+		"""Validate the Collective Sales Order before saving."""
+		self.validate_sales_orders()
+		self.validate_supplier_consistency()
+		# self.validate_duplicate_sales_orders()
+		self.calculate_totals()
+
+	def validate_sales_orders(self):
+		"""Validate that sales orders exist and are in valid state."""
+		if not self.sales_orders:
+			frappe.throw(_("Please add at least one Sales Order"))
+
+		for row in self.sales_orders:
+			if not row.sales_order:
+				frappe.throw(_("Row #{0}: Sales Order is mandatory").format(row.idx))
+
+			# Check if Sales Order exists and is submitted
+			so_status = frappe.db.get_value(
+				"Sales Order",
+				row.sales_order,
+				["docstatus", "status"],
+				as_dict=True
+			)
+
+			if not so_status:
+				frappe.throw(
+					_("Row #{0}: Sales Order {1} does not exist").format(
+						row.idx, frappe.bold(row.sales_order)
+					)
+				)
+
+			if so_status.docstatus != 1:
+				frappe.throw(
+					_("Row #{0}: Sales Order {1} must be submitted").format(
+						row.idx, frappe.bold(row.sales_order)
+					)
+				)
+
+			if so_status.status in ["Closed", "Cancelled"]:
+				frappe.throw(
+					_("Row #{0}: Sales Order {1} is {2}").format(
+						row.idx, frappe.bold(row.sales_order), so_status.status
+					)
+				)
+
+	def validate_supplier_consistency(self):
+		"""Ensure supplier is filled."""
+		if not self.supplier:
+			frappe.throw(_("Supplier is mandatory"))
+
+	def validate_duplicate_sales_orders(self):
+		"""Check for duplicate sales orders in the table."""
+		sales_orders = []
+		for row in self.sales_orders:
+			if row.sales_order in sales_orders:
+				frappe.throw(
+					_("Row #{0}: Sales Order {1} is already added").format(
+						row.idx, frappe.bold(row.sales_order)
+					)
+				)
+			sales_orders.append(row.sales_order)
+
+		# Check if any sales order is already linked to another Collective Sales Order
+		if self.docstatus < 2:  # Only check for non-cancelled documents
+			for row in self.sales_orders:
+				existing_cso = frappe.db.get_value(
+					"Sales Order",
+					row.sales_order,
+					"custom_collective_sales_order"
+				)
+
+				if existing_cso and existing_cso != self.name:
+					frappe.throw(
+						_("Row #{0}: Sales Order {1} is already linked to Collective Sales Order {2}").format(
+							row.idx,
+							frappe.bold(row.sales_order),
+							get_link_to_form("Collective Sales Order", existing_cso)
+						)
+					)
+
+	def calculate_totals(self):
+		"""Calculate total quantity and amount from all sales orders."""
+		self.total_qty = 0
+		self.total_amount = 0
+
+		for row in self.sales_orders:
+			if row.grand_total:
+				self.total_amount += flt(row.grand_total)
+
+		# Get total qty from all SO items
+		if self.sales_orders:
+			so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
+			if so_list:
+				total_qty = frappe.db.sql(
+					"""
+					SELECT SUM(qty) as total_qty
+					FROM `tabSales Order Item`
+					WHERE parent IN ({})
+					""".format(", ".join(["%s"] * len(so_list))),
+					tuple(so_list)
+				)
+				if total_qty and total_qty[0][0]:
+					self.total_qty = flt(total_qty[0][0])
 
 @frappe.whitelist()
 def create_purchase_order(purchase_order, cso_name):
@@ -52,9 +155,9 @@ def create_purchase_order(purchase_order, cso_name):
 
 	po_doc.insert(ignore_permissions=True)
 
-	# # Link PO back to Collective Sales Order
-	# cso_doc.db_set("purchase_order", po_doc.name)
-	# cso_doc.db_set("status", "PO Created")
+	# # Update the current Collective Sales Order with the Purchase Order reference
+	# cso_doc.purchase_order = po_doc.name
+	# cso_doc.save(ignore_permissions=True)
 
 	msgprint(
 		_("Purchase Order {0} created successfully").format(
@@ -64,3 +167,38 @@ def create_purchase_order(purchase_order, cso_name):
 	)
 
 	return po_doc.name
+
+
+@frappe.whitelist()
+def get_sales_orders_for_cso(customer=None):
+	filters = {
+		"docstatus": 1,
+		"status": "To Deliver"
+	}
+	
+	if customer:
+		filters["customer"] = customer
+	
+	sales_orders = frappe.get_all(
+		"Sales Order",
+		filters=filters,
+		fields=[
+			"name", 
+			"customer", 
+			"customer_name", 
+			"grand_total",
+			"transaction_date"
+		],
+		order_by="transaction_date desc"
+	)
+	
+	result = []
+	for so in sales_orders:
+		result.append({
+			"sales_order": so.name,
+			"customer": so.customer,
+			"customer_name": so.customer_name,
+			"grand_total": so.grand_total
+		})
+	
+	return result
