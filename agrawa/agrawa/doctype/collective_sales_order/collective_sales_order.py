@@ -12,7 +12,6 @@ class CollectiveSalesOrder(Document):
 	def validate(self):
 		"""Validate the Collective Sales Order before saving."""
 		self.validate_sales_orders()
-		self.validate_supplier_consistency()
 		# self.validate_duplicate_sales_orders()
 		self.calculate_totals()
 
@@ -54,11 +53,22 @@ class CollectiveSalesOrder(Document):
 					)
 				)
 
-	def validate_supplier_consistency(self):
-		"""Ensure supplier is filled."""
-		if not self.supplier:
-			frappe.throw(_("Supplier is mandatory"))
+			# sales order should not be linked to another collective sales order
+			existing_cso = frappe.db.get_value(
+				"Order Batch Item",
+				{"sales_order": row.sales_order, "parent": ["!=", self.name]},
+				"parent"
+			)
 
+			if existing_cso:
+				frappe.throw(
+					_("Row #{0}: Sales Order {1} is already linked to Collective Sales Order {2}").format(
+						row.idx,
+						frappe.bold(row.sales_order),
+						get_link_to_form("Collective Sales Order", existing_cso)
+					)
+				)
+			
 	def validate_duplicate_sales_orders(self):
 		"""Check for duplicate sales orders in the table."""
 		sales_orders = []
