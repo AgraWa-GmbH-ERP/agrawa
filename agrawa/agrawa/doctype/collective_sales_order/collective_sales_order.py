@@ -159,9 +159,9 @@ def create_purchase_order(cso_name):
 
 	po_doc.insert(ignore_permissions=True)
 
-	# # Update the current Collective Sales Order with the Purchase Order reference
-	# cso_doc.purchase_order = po_doc.name
-	# cso_doc.save(ignore_permissions=True)
+	# Update the current Collective Sales Order with the Purchase Order reference
+	cso_doc.purchase_order = po_doc.name
+	cso_doc.save(ignore_permissions=True)
 
 	msgprint(
 		_("Purchase Order {0} created successfully").format(
