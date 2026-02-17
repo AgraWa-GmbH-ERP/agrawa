@@ -44,6 +44,9 @@ doc_events = {
     },
     "Sales Order": {
         "before_save": "agrawa.overrides.custom_sales_order.set_dropshipping_data"
+    },
+    "Purchase Order": {
+        "on_submit": "agrawa.overrides.purchase_order_hooks.update_collective_sales_order_on_po_submit"
     }
 }
 
