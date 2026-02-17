@@ -16,7 +16,6 @@ frappe.ui.form.on('Collective Sales Order', {
 				frappe.call({
 					method: 'agrawa.agrawa.doctype.collective_sales_order.collective_sales_order.create_purchase_order',
 					args: {
-						purchase_order: frm.doc.purchase_order,
 						cso_name: frm.doc.name
 					},
 					callback: function(r) {

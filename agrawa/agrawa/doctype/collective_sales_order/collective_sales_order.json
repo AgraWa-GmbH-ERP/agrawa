@@ -24,6 +24,7 @@
  ],
  "fields": [
   {
+   "default": "CSO-.YYYY.-",
    "fieldname": "naming_series",
    "fieldtype": "Select",
    "in_list_view": 1,
@@ -113,7 +114,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-17 06:55:50.570226",
+ "modified": "2026-02-17 12:01:50.254134",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",

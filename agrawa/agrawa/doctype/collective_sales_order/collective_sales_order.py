@@ -124,14 +124,8 @@ class CollectiveSalesOrder(Document):
 					self.total_qty = flt(total_qty[0][0])
 
 @frappe.whitelist()
-def create_purchase_order(purchase_order, cso_name):
-	"""Create a consolidated Purchase Order from all Sales Orders."""
-	if purchase_order:
-		frappe.throw(
-			_("Purchase Order {0} already created").format(
-				get_link_to_form("Purchase Order", purchase_order)
-			)
-		)
+def create_purchase_order(cso_name):
+
 	cso_doc = frappe.get_doc("Collective Sales Order", cso_name)
 	
 	# Create Purchase Order
