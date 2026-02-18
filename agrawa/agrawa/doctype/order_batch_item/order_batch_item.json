@@ -10,8 +10,7 @@
   "customer",
   "customer_name",
   "column_break_1",
-  "grand_total",
-  "sales_invoice"
+  "grand_total"
  ],
  "fields": [
   {
@@ -49,18 +48,12 @@
    "fieldtype": "Currency",
    "label": "Grand Total",
    "read_only": 1
-  },
-  {
-   "fieldname": "sales_invoice",
-   "fieldtype": "Link",
-   "label": "Sales Invoice",
-   "options": "Sales Invoice"
   }
  ],
  "index_web_pages_for_search": 1,
  "istable": 1,
  "links": [],
- "modified": "2026-02-16 12:54:50.361719",
+ "modified": "2026-02-18 11:22:15.776799",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Order Batch Item",

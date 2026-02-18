@@ -17,6 +17,8 @@
   "supplier",
   "section_break_sales_orders",
   "sales_orders",
+  "section_break_invoices",
+  "invoice_items",
   "section_break_amounts",
   "total_qty",
   "total_amount",
@@ -87,6 +89,18 @@
    "label": "Sales Orders",
    "options": "Order Batch Item",
    "reqd": 1
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "section_break_invoices",
+   "fieldtype": "Section Break",
+   "label": "Sales Invoices"
+  },
+  {
+   "fieldname": "invoice_items",
+   "fieldtype": "Table",
+   "label": "Invoice Items",
+   "options": "Batch Order Invoice Item"
   },
   {
    "collapsible": 1,
