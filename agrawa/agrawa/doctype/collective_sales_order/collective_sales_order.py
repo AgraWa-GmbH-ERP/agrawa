@@ -5,6 +5,8 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import flt, get_link_to_form
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 
 
 class CollectiveSalesOrder(Document):
@@ -124,16 +126,15 @@ class CollectiveSalesOrder(Document):
 		if self.sales_orders:
 			so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
 			if so_list:
-				total_qty = frappe.db.sql(
-					"""
-					SELECT SUM(qty) as total_qty
-					FROM `tabSales Order Item`
-					WHERE parent IN ({})
-					""".format(", ".join(["%s"] * len(so_list))),
-					tuple(so_list)
-				)
-				if total_qty and total_qty[0][0]:
-					self.total_qty = flt(total_qty[0][0])
+				SalesOrderItem = DocType('Sales Order Item')
+				total_qty_result = (
+					frappe.qb.from_(SalesOrderItem)
+					.select(Sum(SalesOrderItem.qty).as_('total_qty'))
+					.where(SalesOrderItem.parent.isin(so_list))
+				).run(as_dict=True)
+				
+				if total_qty_result and total_qty_result[0]['total_qty']:
+					self.total_qty = flt(total_qty_result[0]['total_qty'])
 
 
 def get_pending_invoices_for_sales_orders(cso_doc):
@@ -148,27 +149,34 @@ def get_pending_invoices_for_sales_orders(cso_doc):
 	# Get existing invoice items to avoid duplicates
 	existing_invoices = [d.sales_invoice for d in cso_doc.invoice_items if d.sales_invoice] if cso_doc.invoice_items else []
 	
-	# Query for sales invoices linked to our sales orders
-	query = """
-		SELECT DISTINCT si.name as sales_invoice, si.customer, si.customer_name, 
-			   si.posting_date, si.status, si.grand_total, si.outstanding_amount,
-			   sii.sales_order
-		FROM `tabSales Invoice` si
-		INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
-		WHERE sii.sales_order IN ({placeholders})
-		AND si.docstatus = 1
-		{existing_filter}
-		ORDER BY si.posting_date DESC
-	""".format(
-		placeholders=", ".join(["%s"] * len(so_list)),
-		existing_filter="AND si.name NOT IN ({})".format(", ".join(["%s"] * len(existing_invoices))) if existing_invoices else ""
+	# Build query using query builder
+	SalesInvoice = DocType('Sales Invoice')
+	SalesInvoiceItem = DocType('Sales Invoice Item')
+	
+	query = (
+		frappe.qb.from_(SalesInvoice)
+		.inner_join(SalesInvoiceItem).on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(
+			SalesInvoice.name.as_('sales_invoice'),
+			SalesInvoice.customer,
+			SalesInvoice.customer_name,
+			SalesInvoice.posting_date,
+			SalesInvoice.status,
+			SalesInvoice.grand_total,
+			SalesInvoice.outstanding_amount,
+			SalesInvoiceItem.sales_order
+		)
+		.where(SalesInvoiceItem.sales_order.isin(so_list))
+		.where(SalesInvoice.docstatus == 1)
+		.distinct()
+		.orderby(SalesInvoice.posting_date, order=frappe.qb.desc)
 	)
 	
-	params = so_list
+	# Add filter for existing invoices if any
 	if existing_invoices:
-		params.extend(existing_invoices)
+		query = query.where(SalesInvoice.name.notin(existing_invoices))
 		
-	return frappe.db.sql(query, params, as_dict=True)
+	return query.run(as_dict=True)
 
 
 @frappe.whitelist()
