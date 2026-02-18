@@ -5,15 +5,29 @@ import frappe
 from frappe import _, msgprint
 from frappe.model.document import Document
 from frappe.utils import flt, get_link_to_form
+from frappe.query_builder import DocType
+from frappe.query_builder.functions import Sum
 
 
 class CollectiveSalesOrder(Document):
-	pass
 	def validate(self):
 		"""Validate the Collective Sales Order before saving."""
 		self.validate_sales_orders()
 		# self.validate_duplicate_sales_orders()
 		self.calculate_totals()
+		self.validate_invoice_items()
+
+	def validate_invoice_items(self):
+		"""Validate invoice items to ensure they belong to the sales orders in this batch."""
+		if self.invoice_items:
+			so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
+			for row in self.invoice_items:
+				if row.sales_order and row.sales_order not in so_list:
+					frappe.throw(
+						_("Row #{0}: Sales Order {1} in invoice items is not part of this collective order").format(
+							row.idx, frappe.bold(row.sales_order)
+						)
+					)
 
 	def validate_sales_orders(self):
 		"""Validate that sales orders exist and are in valid state."""
@@ -112,16 +126,81 @@ class CollectiveSalesOrder(Document):
 		if self.sales_orders:
 			so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
 			if so_list:
-				total_qty = frappe.db.sql(
-					"""
-					SELECT SUM(qty) as total_qty
-					FROM `tabSales Order Item`
-					WHERE parent IN ({})
-					""".format(", ".join(["%s"] * len(so_list))),
-					tuple(so_list)
-				)
-				if total_qty and total_qty[0][0]:
-					self.total_qty = flt(total_qty[0][0])
+				SalesOrderItem = DocType('Sales Order Item')
+				total_qty_result = (
+					frappe.qb.from_(SalesOrderItem)
+					.select(Sum(SalesOrderItem.qty).as_('total_qty'))
+					.where(SalesOrderItem.parent.isin(so_list))
+				).run(as_dict=True)
+				
+				if total_qty_result and total_qty_result[0]['total_qty']:
+					self.total_qty = flt(total_qty_result[0]['total_qty'])
+
+
+def get_pending_invoices_for_sales_orders(cso_doc):
+	"""Get sales invoices that are created from the sales orders in this batch but not yet added to invoice_items."""
+	if not cso_doc.sales_orders:
+		return []
+	
+	so_list = [d.sales_order for d in cso_doc.sales_orders if d.sales_order]
+	if not so_list:
+		return []
+		
+	# Get existing invoice items to avoid duplicates
+	existing_invoices = [d.sales_invoice for d in cso_doc.invoice_items if d.sales_invoice] if cso_doc.invoice_items else []
+	
+	# Build query using query builder
+	SalesInvoice = DocType('Sales Invoice')
+	SalesInvoiceItem = DocType('Sales Invoice Item')
+	
+	query = (
+		frappe.qb.from_(SalesInvoice)
+		.inner_join(SalesInvoiceItem).on(SalesInvoice.name == SalesInvoiceItem.parent)
+		.select(
+			SalesInvoice.name.as_('sales_invoice'),
+			SalesInvoice.customer,
+			SalesInvoice.customer_name,
+			SalesInvoice.posting_date,
+			SalesInvoice.status,
+			SalesInvoice.grand_total,
+			SalesInvoice.outstanding_amount,
+			SalesInvoiceItem.sales_order
+		)
+		.where(SalesInvoiceItem.sales_order.isin(so_list))
+		.where(SalesInvoice.docstatus == 1)
+		.distinct()
+		.orderby(SalesInvoice.posting_date, order=frappe.qb.desc)
+	)
+	
+	# Add filter for existing invoices if any
+	if existing_invoices:
+		query = query.where(SalesInvoice.name.notin(existing_invoices))
+		
+	return query.run(as_dict=True)
+
+
+@frappe.whitelist()
+def add_pending_invoices(cso_name):
+	"""Add all pending invoices for sales orders in this batch."""
+	cso_doc = frappe.get_doc("Collective Sales Order", cso_name)
+	pending_invoices = get_pending_invoices_for_sales_orders(cso_doc)
+	
+	for invoice in pending_invoices:
+		cso_doc.append("invoice_items", {
+			"sales_order": invoice.sales_order,
+			"sales_invoice": invoice.sales_invoice
+		})
+	
+	cso_doc.save()
+	
+	if pending_invoices:
+		frappe.msgprint(
+			_("Added {0} pending invoice(s) to the batch").format(len(pending_invoices)),
+			alert=True
+		)
+	else:
+		frappe.msgprint(_("No pending invoices found"), alert=True)
+
 
 @frappe.whitelist()
 def create_purchase_order(cso_name):
