@@ -75,5 +75,6 @@ fixtures = [
 
 override_doctype_dashboards = {
     "Purchase Invoice": "agrawa.overrides.custom_dashboard.purchase_invoice_dashboard",
-    "Sales Order": "agrawa.overrides.custom_dashboard.sales_order_dashboard"
+    "Sales Order": "agrawa.overrides.custom_dashboard.sales_order_dashboard",
+    "Purchase Order": "agrawa.overrides.custom_dashboard.purchase_order_dashboard"
 }
