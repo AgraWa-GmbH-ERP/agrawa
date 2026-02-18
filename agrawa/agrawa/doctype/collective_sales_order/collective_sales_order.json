@@ -63,7 +63,6 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_purchase",
    "fieldtype": "Section Break",
    "label": "Purchase Details"
@@ -91,7 +90,6 @@
    "reqd": 1
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_invoices",
    "fieldtype": "Section Break",
    "label": "Sales Invoices"
@@ -103,7 +101,6 @@
    "options": "Batch Order Invoice Item"
   },
   {
-   "collapsible": 1,
    "fieldname": "section_break_amounts",
    "fieldtype": "Section Break",
    "label": "Totals"
@@ -128,7 +125,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-17 12:01:50.254134",
+ "modified": "2026-02-18 13:06:57.641315",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",

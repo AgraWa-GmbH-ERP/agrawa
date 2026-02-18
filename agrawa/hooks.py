@@ -37,7 +37,8 @@ doctype_js = {
 doc_events = {
     "Sales Invoice": {
         "on_submit": [
-            "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing"
+            "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing",
+            "agrawa.overrides.custom_sales_invoice.auto_add_sales_invoice_to_collective_order"
         ],
         "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation",
         "on_trash": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation"
