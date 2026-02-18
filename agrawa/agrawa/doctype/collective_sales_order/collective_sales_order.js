@@ -27,6 +27,20 @@ frappe.ui.form.on('Collective Sales Order', {
 				});
 			});
 		}
+
+		if (!frm.is_new() && frm.doc.sales_orders && frm.doc.sales_orders.length > 0) {
+			frm.add_custom_button(__('Add Pending Invoices'), function() {
+				frappe.call({
+					method: 'agrawa.agrawa.doctype.collective_sales_order.collective_sales_order.add_pending_invoices',
+					args: {
+						cso_name: frm.doc.name
+					},
+					callback: function(r) {
+						frm.reload_doc();
+					}
+				});
+			});
+		}
 	},
 });
 

@@ -8,12 +8,24 @@ from frappe.utils import flt, get_link_to_form
 
 
 class CollectiveSalesOrder(Document):
-	pass
 	def validate(self):
 		"""Validate the Collective Sales Order before saving."""
 		self.validate_sales_orders()
 		# self.validate_duplicate_sales_orders()
 		self.calculate_totals()
+		self.validate_invoice_items()
+
+	def validate_invoice_items(self):
+		"""Validate invoice items to ensure they belong to the sales orders in this batch."""
+		if self.invoice_items:
+			so_list = [d.sales_order for d in self.sales_orders if d.sales_order]
+			for row in self.invoice_items:
+				if row.sales_order and row.sales_order not in so_list:
+					frappe.throw(
+						_("Row #{0}: Sales Order {1} in invoice items is not part of this collective order").format(
+							row.idx, frappe.bold(row.sales_order)
+						)
+					)
 
 	def validate_sales_orders(self):
 		"""Validate that sales orders exist and are in valid state."""
@@ -122,6 +134,65 @@ class CollectiveSalesOrder(Document):
 				)
 				if total_qty and total_qty[0][0]:
 					self.total_qty = flt(total_qty[0][0])
+
+
+def get_pending_invoices_for_sales_orders(cso_doc):
+	"""Get sales invoices that are created from the sales orders in this batch but not yet added to invoice_items."""
+	if not cso_doc.sales_orders:
+		return []
+	
+	so_list = [d.sales_order for d in cso_doc.sales_orders if d.sales_order]
+	if not so_list:
+		return []
+		
+	# Get existing invoice items to avoid duplicates
+	existing_invoices = [d.sales_invoice for d in cso_doc.invoice_items if d.sales_invoice] if cso_doc.invoice_items else []
+	
+	# Query for sales invoices linked to our sales orders
+	query = """
+		SELECT DISTINCT si.name as sales_invoice, si.customer, si.customer_name, 
+			   si.posting_date, si.status, si.grand_total, si.outstanding_amount,
+			   sii.sales_order
+		FROM `tabSales Invoice` si
+		INNER JOIN `tabSales Invoice Item` sii ON si.name = sii.parent
+		WHERE sii.sales_order IN ({placeholders})
+		AND si.docstatus = 1
+		{existing_filter}
+		ORDER BY si.posting_date DESC
+	""".format(
+		placeholders=", ".join(["%s"] * len(so_list)),
+		existing_filter="AND si.name NOT IN ({})".format(", ".join(["%s"] * len(existing_invoices))) if existing_invoices else ""
+	)
+	
+	params = so_list
+	if existing_invoices:
+		params.extend(existing_invoices)
+		
+	return frappe.db.sql(query, params, as_dict=True)
+
+
+@frappe.whitelist()
+def add_pending_invoices(cso_name):
+	"""Add all pending invoices for sales orders in this batch."""
+	cso_doc = frappe.get_doc("Collective Sales Order", cso_name)
+	pending_invoices = get_pending_invoices_for_sales_orders(cso_doc)
+	
+	for invoice in pending_invoices:
+		cso_doc.append("invoice_items", {
+			"sales_order": invoice.sales_order,
+			"sales_invoice": invoice.sales_invoice
+		})
+	
+	cso_doc.save()
+	
+	if pending_invoices:
+		frappe.msgprint(
+			_("Added {0} pending invoice(s) to the batch").format(len(pending_invoices)),
+			alert=True
+		)
+	else:
+		frappe.msgprint(_("No pending invoices found"), alert=True)
+
 
 @frappe.whitelist()
 def create_purchase_order(cso_name):
