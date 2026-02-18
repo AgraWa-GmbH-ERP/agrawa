@@ -59,3 +59,25 @@ def purchase_order_dashboard(data):
 		})
 
 	return data
+
+
+def sales_invoice_dashboard(data):
+	# Add Collective Sales Order link configuration
+	data["internal_links"]["Collective Sales Order"] = ["sales_invoice", "Collective Sales Order"]
+	
+	# Add Collective Sales Order to a suitable transaction group
+	collective_group_found = False
+	for i, d in enumerate(data["transactions"]):
+		if d["label"] == _("Fulfillment"):
+			data["transactions"][i]["items"].append("Collective Sales Order")
+			collective_group_found = True
+			break
+	
+	# If no suitable group found, create a new group
+	if not collective_group_found:
+		data["transactions"].append({
+			"label": _("Collective Sales Order"),
+			"items": ["Collective Sales Order"]
+		})
+
+	return data
