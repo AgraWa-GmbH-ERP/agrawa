@@ -224,7 +224,7 @@ def create_purchase_order(cso_name):
 def get_sales_orders_for_cso(customer=None):
 	filters = {
 		"docstatus": 1,
-		"status": ["To Deliver", "To Deliver and Bill"]
+		"status": ["in", ["To Deliver", "To Deliver and Bill"]]
 	}
 	
 	if customer:
