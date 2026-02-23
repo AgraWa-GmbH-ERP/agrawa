@@ -47,6 +47,7 @@ frappe.ui.form.on('Collective Sales Order', {
 function show_fetch_sales_orders_dialog(frm) {
 	const dialog = new frappe.ui.Dialog({
 		title: __('Fetch Sales Orders'),
+		size: "large",
 		fields: [
 			{
 				fieldname: 'customer',
@@ -54,6 +55,11 @@ function show_fetch_sales_orders_dialog(frm) {
 				label: __('Customer'),
 				options: 'Customer',
 				reqd: 0
+			},
+			{
+				// columns break
+				fieldname: 'column_break11',
+				fieldtype: 'Column Break'
 			},
 			{
 				fieldname: 'section_break',
