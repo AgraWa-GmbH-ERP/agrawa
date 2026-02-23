@@ -71,6 +71,7 @@
    "fieldname": "purchase_order",
    "fieldtype": "Link",
    "label": "Purchase Order",
+   "no_copy": 1,
    "options": "Purchase Order"
   },
   {
@@ -86,6 +87,7 @@
    "fieldname": "sales_orders",
    "fieldtype": "Table",
    "label": "Sales Orders",
+   "no_copy": 1,
    "options": "Order Batch Item",
    "reqd": 1
   },
@@ -98,6 +100,7 @@
    "fieldname": "invoice_items",
    "fieldtype": "Table",
    "label": "Invoice Items",
+   "no_copy": 1,
    "options": "Batch Order Invoice Item"
   },
   {
@@ -109,6 +112,7 @@
    "fieldname": "total_qty",
    "fieldtype": "Float",
    "label": "Total Qty",
+   "no_copy": 1,
    "read_only": 1
   },
   {
@@ -125,7 +129,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-18 13:06:57.641315",
+ "modified": "2026-02-23 06:58:13.570412",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",
