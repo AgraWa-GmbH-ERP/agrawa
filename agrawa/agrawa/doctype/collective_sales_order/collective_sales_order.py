@@ -13,7 +13,6 @@ class CollectiveSalesOrder(Document):
 	def validate(self):
 		"""Validate the Collective Sales Order before saving."""
 		self.validate_sales_orders()
-		# self.validate_duplicate_sales_orders()
 		self.calculate_totals()
 		self.validate_invoice_items()
 
@@ -82,36 +81,6 @@ class CollectiveSalesOrder(Document):
 						get_link_to_form("Collective Sales Order", existing_cso)
 					)
 				)
-			
-	def validate_duplicate_sales_orders(self):
-		"""Check for duplicate sales orders in the table."""
-		sales_orders = []
-		for row in self.sales_orders:
-			if row.sales_order in sales_orders:
-				frappe.throw(
-					_("Row #{0}: Sales Order {1} is already added").format(
-						row.idx, frappe.bold(row.sales_order)
-					)
-				)
-			sales_orders.append(row.sales_order)
-
-		# Check if any sales order is already linked to another Collective Sales Order
-		if self.docstatus < 2:  # Only check for non-cancelled documents
-			for row in self.sales_orders:
-				existing_cso = frappe.db.get_value(
-					"Sales Order",
-					row.sales_order,
-					"custom_collective_sales_order"
-				)
-
-				if existing_cso and existing_cso != self.name:
-					frappe.throw(
-						_("Row #{0}: Sales Order {1} is already linked to Collective Sales Order {2}").format(
-							row.idx,
-							frappe.bold(row.sales_order),
-							get_link_to_form("Collective Sales Order", existing_cso)
-						)
-					)
 
 	def calculate_totals(self):
 		"""Calculate total quantity and amount from all sales orders."""
@@ -213,7 +182,6 @@ def create_purchase_order(cso_name):
 	po_doc.company = cso_doc.company
 	po_doc.transaction_date = cso_doc.batch_date
 	po_doc.schedule_date = cso_doc.batch_date
-	po_doc.custom_collective_sales_order = cso_doc.name
 
 	# Add all items from all sales orders
 	for so_row in cso_doc.sales_orders:
@@ -256,7 +224,7 @@ def create_purchase_order(cso_name):
 def get_sales_orders_for_cso(customer=None):
 	filters = {
 		"docstatus": 1,
-		"status": "To Deliver"
+		"status": ["To Deliver", "To Deliver and Bill"]
 	}
 	
 	if customer:
