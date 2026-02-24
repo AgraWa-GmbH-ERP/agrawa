@@ -45,7 +45,7 @@ def make_sales_invoice_from_purchase_invoice(
 				"validation": {"docstatus": ["=", 1]},
 				"field_no_map": [
 					"purchase_invoice",
-					"taxes_and_charges"
+					"taxes_and_charges",
 					"address_display",
 					"contact_person",
 					"contact_display",
