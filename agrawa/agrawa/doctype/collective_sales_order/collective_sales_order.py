@@ -189,11 +189,12 @@ def create_purchase_order(cso_name, customer=None):
 	po_doc.schedule_date = cso_doc.batch_date
 
 	# Add all items from all sales orders
+	has_drop_ship_items = False
 	for so_row in cso_doc.sales_orders:
 		so_items = frappe.get_all(
 			"Sales Order Item",
 			filters={"parent": so_row.sales_order, "docstatus": 1},
-			fields=["item_code", "item_name", "description", "qty", "uom", "rate", "warehouse", "name"]
+			fields=["item_code", "item_name", "description", "qty", "uom", "rate", "warehouse", "name", "delivered_by_supplier"]
 		)
 
 		for item in so_items:
@@ -206,8 +207,10 @@ def create_purchase_order(cso_name, customer=None):
 				"rate": item.rate,
 				"warehouse": item.warehouse,
 				"sales_order": so_row.sales_order,
-				"sales_order_item": item.name
+				"sales_order_item": item.name,
+				"delivered_by_supplier": item.delivered_by_supplier
 			})
+
 
 	po_doc.insert(ignore_permissions=True)
 
