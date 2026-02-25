@@ -172,9 +172,14 @@ def add_pending_invoices(cso_name):
 
 
 @frappe.whitelist()
-def create_purchase_order(cso_name):
+def create_purchase_order(cso_name, customer=None):
 
 	cso_doc = frappe.get_doc("Collective Sales Order", cso_name)
+	
+	# Save customer if provided
+	if customer:
+		cso_doc.customer = customer
+		cso_doc.save(ignore_permissions=True)
 	
 	# Create Purchase Order
 	po_doc = frappe.new_doc("Purchase Order")

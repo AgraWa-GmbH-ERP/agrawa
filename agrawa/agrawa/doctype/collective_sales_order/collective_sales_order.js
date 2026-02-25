@@ -13,18 +13,52 @@ frappe.ui.form.on('Collective Sales Order', {
 		
 		if (!frm.is_new() && !frm.doc.purchase_order) {
 			frm.add_custom_button(__('Create Purchase Order'), function() {
-				frappe.call({
-					method: 'agrawa.agrawa.doctype.collective_sales_order.collective_sales_order.create_purchase_order',
-					args: {
-						cso_name: frm.doc.name
-					},
-					callback: function(r) {
-						if (r.message) {
-							frm.reload_doc();
-							frappe.set_route('Form', 'Purchase Order', r.message);
+				let customers = [];
+				if (frm.doc.sales_orders && frm.doc.sales_orders.length > 0) {
+					let customer_map = {};
+					frm.doc.sales_orders.forEach(function(row) {
+						if (row.customer) {
+							customer_map[row.customer] = row.customer_name || row.customer;
 						}
+					});
+					customers = Object.keys(customer_map);
+					
+					if (customers.length > 1) {
+						let dialog = new frappe.ui.Dialog({
+							title: __('Select Customer'),
+							fields: [
+								{
+									fieldname: 'customer',
+									fieldtype: 'Link',
+									label: __('Customer'),
+									options: 'Customer',
+									reqd: 1,
+									get_query: function() {
+										return {
+											filters: {
+												'name': ['in', customers]
+											}
+										};
+									}
+								}
+							],
+							primary_action_label: __('Create Purchase Order'),
+							primary_action: function() {
+								let selected_customer = dialog.get_value('customer');
+								dialog.hide();
+								create_purchase_order_with_customer(frm, selected_customer);
+							}
+						});
+						dialog.show();
+					} else if (customers.length === 1) {
+						// If only one customer, directly create purchase order
+						create_purchase_order_with_customer(frm, customers[0]);
+					} else {
+						frappe.msgprint(__('No customers found in sales orders'));
 					}
-				});
+				} else {
+					frappe.msgprint(__('No sales orders found'));
+				}
 			});
 		}
 
@@ -153,4 +187,20 @@ function show_fetch_sales_orders_dialog(frm) {
 	});
 	
 	dialog.show();
+}
+
+function create_purchase_order_with_customer(frm, customer) {
+	frappe.call({
+		method: 'agrawa.agrawa.doctype.collective_sales_order.collective_sales_order.create_purchase_order',
+		args: {
+			cso_name: frm.doc.name,
+			customer: customer
+		},
+		callback: function(r) {
+			if (r.message) {
+				frm.reload_doc();
+				frappe.set_route('Form', 'Purchase Order', r.message);
+			}
+		}
+	});
 }
