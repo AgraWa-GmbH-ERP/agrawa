@@ -125,10 +125,12 @@
             {% endfor %}
 
         <!-- Additional Discount Row -->
-        <tr>
-            <td colspan="8" class="text-right"><b>{{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%</b></td>
-            <td class="text-right"><b>{{ format_currency(doc.discount_amount) }}</b></td>
-        </tr>
+        {% if doc.additional_discount_percentage and doc.discount_amount %}
+            <tr>
+                <td colspan="8" class="text-right"><b>{{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%</b></td>
+                <td class="text-right"><b>{{ format_currency(doc.discount_amount) }}</b></td>
+            </tr>
+        {% endif %}
         <!-- Grand Total Row -->
         <tr>
             <td colspan="8" class="text-right"><b>{{ _("Grand Total") }}</b></td>
