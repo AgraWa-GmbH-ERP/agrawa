@@ -188,6 +188,44 @@ def create_purchase_order(cso_name, customer=None):
 	po_doc.transaction_date = cso_doc.batch_date
 	po_doc.schedule_date = cso_doc.batch_date
 
+	default_ptct = frappe.db.get_value(
+			"Purchase Taxes and Charges Template",
+			{
+				"company": po_doc.company,
+				"is_default": 1,
+				"disabled": 0,
+			},
+			"name",
+    	)
+
+	if default_ptct:
+			po_doc.taxes_and_charges = default_ptct
+			po_doc.set("taxes", [])
+
+			ptct = frappe.get_doc("Purchase Taxes and Charges Template", default_ptct)
+
+			for t in ptct.taxes:
+				po_doc.append("taxes", {
+					"charge_type": t.charge_type,
+					"account_head": t.account_head,
+					"description": t.description,
+					"rate": t.rate,
+					"tax_amount": 0,
+					"tax_amount_after_discount_amount": 0,
+					"cost_center": t.cost_center,
+					"included_in_print_rate": t.included_in_print_rate,
+					"included_in_paid_amount": t.included_in_paid_amount,
+					"add_deduct_tax": t.add_deduct_tax,
+					"category": t.category,
+					"row_id": t.row_id,
+				})
+
+	if not po_doc.taxes:
+		# po_doc.append_taxes_from_item_tax_template()
+		pass
+	po_doc.run_method("calculate_taxes_and_totals")
+
+
 	# Add all items from all sales orders
 	has_drop_ship_items = False
 	for so_row in cso_doc.sales_orders:
@@ -211,6 +249,31 @@ def create_purchase_order(cso_name, customer=None):
 				"delivered_by_supplier": item.delivered_by_supplier
 			})
 
+			# Check if any item is for drop shipping
+			if item.delivered_by_supplier:
+				has_drop_ship_items = True
+	
+	if has_drop_ship_items and cso_doc.customer:
+		po_doc.customer = cso_doc.customer
+		
+		for so_row in cso_doc.sales_orders:
+			if so_row.customer == cso_doc.customer:
+				so_doc = frappe.get_doc("Sales Order", so_row.sales_order)
+				
+				# Set shipping address
+				if so_doc.shipping_address_name:
+					po_doc.shipping_address = so_doc.shipping_address_name
+					po_doc.shipping_address_display = so_doc.shipping_address
+				else:
+					po_doc.shipping_address = so_doc.customer_address
+					po_doc.shipping_address_display = so_doc.address_display
+				
+				# Set customer contact details
+				po_doc.customer_contact_person = so_doc.contact_person
+				po_doc.customer_contact_display = so_doc.contact_display
+				po_doc.customer_contact_mobile = so_doc.contact_mobile
+				po_doc.customer_contact_email = so_doc.contact_email
+				break
 
 	po_doc.insert(ignore_permissions=True)
 
