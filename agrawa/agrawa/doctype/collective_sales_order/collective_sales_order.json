@@ -11,14 +11,11 @@
   "batch_date",
   "column_break_basic",
   "company",
+  "customer",
   "section_break_purchase",
   "purchase_order",
   "column_break_purchase",
   "supplier",
-  "section_break_customer",
-  "customer",
-  "column_break_customer",
-  "customer_name",
   "section_break_sales_orders",
   "sales_orders",
   "section_break_invoices",
@@ -83,28 +80,10 @@
    "fieldtype": "Column Break"
   },
   {
-   "fieldname": "section_break_customer",
-   "fieldtype": "Section Break",
-   "label": "Customer Details"
-  },
-  {
    "fieldname": "customer",
    "fieldtype": "Link",
    "label": "Customer",
-   "no_copy": 1,
    "options": "Customer"
-  },
-  {
-   "fieldname": "column_break_customer",
-   "fieldtype": "Column Break"
-  },
-  {
-   "fetch_from": "customer.customer_name",
-   "fieldname": "customer_name",
-   "fieldtype": "Data",
-   "label": "Customer Name",
-   "no_copy": 1,
-   "read_only": 1
   },
   {
    "fieldname": "section_break_sales_orders",
@@ -157,7 +136,7 @@
  ],
  "index_web_pages_for_search": 1,
  "links": [],
- "modified": "2026-02-23 06:58:13.570413",
+ "modified": "2026-02-26 12:20:35.695459",
  "modified_by": "Administrator",
  "module": "Agrawa",
  "name": "Collective Sales Order",
