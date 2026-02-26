@@ -248,7 +248,9 @@ def create_purchase_order(cso_name, customer=None):
 			if item.delivered_by_supplier:
 				has_drop_ship_items = True
 	
-	if has_drop_ship_items and cso_doc.customer:
+	if has_drop_ship_items and customer:
+		# Update the current Collective Sales Order to link to the customer from the sales orders for drop shipping
+		cso_doc.customer = customer
 		po_doc.customer = cso_doc.customer
 		
 		for so_row in cso_doc.sales_orders:
@@ -272,11 +274,7 @@ def create_purchase_order(cso_name, customer=None):
 
 	po_doc.insert(ignore_permissions=True)
 
-	# Update the current Collective Sales Order
-	if customer:
-		cso_doc.customer = customer
-		cso_doc.save(ignore_permissions=True)
-	
+	# Update the current Collective Sales Order to link to the created Purchase Order
 	cso_doc.purchase_order = po_doc.name
 	cso_doc.save(ignore_permissions=True)
 
