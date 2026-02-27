@@ -1,27 +1,21 @@
 const MERGE_CHECK_INTERVAL = 700;
-const STABILITY_THRESHOLD = 2; 
+const STABILITY_THRESHOLD = 2;
 
 frappe.ui.form.on("Material Request", {
 	refresh(frm) {
-		if (frm.doc.docstatus === 0) {
-			frm.add_custom_button(
-				__("Sales Order"),
-				() => frm.events.get_items_from_sales_order(frm),
-				__("Get Items From")
-			);
-		}
-	},
-	get_items_from_sales_order(frm) {
-		frm.__merge_watch = {
-			last_len: 0,
-			unchanged_count: 0
-		};
+		if (frm.doc.docstatus !== 0) return;
 
-		// Show loading indicator
-		frappe.show_alert({
-			message: __('Loading items from Sales Order...'),
-			indicator: 'blue'
-		});
+		frm.add_custom_button(
+			__("Sales Order"),
+			() => frm.events.get_items_from_sales_order(frm),
+			__("Get Items From")
+		);
+	},
+
+	// Get items from Sales Order
+	get_items_from_sales_order(frm) {
+		frm.events.init_merge_watch(frm);
+		frm.events.show_loading_alert();
 
 		erpnext.utils.map_current_doc({
 			method: "erpnext.selling.doctype.sales_order.sales_order.make_material_request",
@@ -42,28 +36,41 @@ frappe.ui.form.on("Material Request", {
 		frm.events.wait_and_merge(frm);
 	},
 
+	// Helpers
+	init_merge_watch(frm) {
+		frm.__merge_watch = {
+			last_len: 0,
+			unchanged_count: 0
+		};
+	},
+
+	show_loading_alert() {
+		frappe.show_alert({
+			message: __("Loading items from Sales Order..."),
+			indicator: "blue"
+		});
+	},
+
+	// Wait until items stabilize
 	wait_and_merge(frm) {
 		setTimeout(() => {
-			if (!frm || frm.is_dirty === undefined) {
-				if (frm && frm.__merge_watch) {
-					frm.__merge_watch = null;
-				}
+			if (!frm ||!frm.__merge_watch) {
+				frm.__merge_watch = null;
 				return;
 			}
 
-			if (!frm.__merge_watch) return;
+			const items_len = (frm.doc.items || []).length;
+			const watch = frm.__merge_watch;
 
-			let current_len = (frm.doc.items || []).length;
-
-			if (current_len === frm.__merge_watch.last_len && current_len > 1) {
-				frm.__merge_watch.unchanged_count += 1;
+			if (items_len === watch.last_len && items_len > 1) {
+				watch.unchanged_count++;
 			} else {
-				frm.__merge_watch.unchanged_count = 0;
+				watch.unchanged_count = 0;
 			}
 
-			frm.__merge_watch.last_len = current_len;
+			watch.last_len = items_len;
 
-			if (frm.__merge_watch.unchanged_count >= STABILITY_THRESHOLD) {
+			if (watch.unchanged_count >= STABILITY_THRESHOLD) {
 				frm.__merge_watch = null;
 				frm.events.merge_material_request_items(frm);
 				return;
@@ -73,56 +80,53 @@ frappe.ui.form.on("Material Request", {
 		}, MERGE_CHECK_INTERVAL);
 	},
 
-
+	// Merge duplicate items
 	merge_material_request_items(frm) {
-		if (!frm.doc.items || frm.doc.items.length < 2) {
-			return;
-		}
+		if (!frm.doc.items || frm.doc.items.length < 2) return;
 
-		const original_count = frm.doc.items.length;
-		let merged_map = {};
-		let new_items = [];
-		let skipped_items = 0;
+		const merged = {};
+		const final_items = [];
+		let skipped = 0;
 
 		frm.doc.items.forEach(row => {
 			if (!row.item_code || !row.uom) {
-				console.warn('Skipping row with missing item_code or uom:', row);
-				skipped_items++;
+				skipped++;
 				return;
 			}
 
-			let key = `${row.item_code}||${row.uom}`;
+			const key = `${row.item_code}||${row.uom}`;
 
-			if (merged_map[key]) {
-				merged_map[key].qty += row.qty || 0;
+			if (merged[key]) {
+				merged[key].qty += row.qty || 0;
 			} else {
-				merged_map[key] = frappe.model.copy_doc(row);
-				new_items.push(merged_map[key]);
+				merged[key] = frappe.model.copy_doc(row);
+				final_items.push(merged[key]);
 			}
 		});
 
 		frm.clear_table("items");
 
-		new_items.forEach(row => {
-			let d = frm.add_child("items");
+		final_items.forEach(row => {
+			const d = frm.add_child("items");
 			Object.assign(d, row);
 		});
 
 		frm.refresh_field("items");
 
-		const merged_count = original_count - new_items.length;
+		const merged_count = frm.doc.items.length - final_items.length;
+
 		if (merged_count > 0) {
-			frappe.show_alert({
-				message: __('Merged {0} duplicate items', [merged_count]),
-				indicator: 'green'
-			}, 5);
+			frappe.show_alert(
+				{ message: __("Merged {0} duplicate items", [merged_count]), indicator: "green" },
+				5
+			);
 		}
 
-		if (skipped_items > 0) {
-			frappe.show_alert({
-				message: __('Warning: {0} items skipped due to missing data', [skipped_items]),
-				indicator: 'orange'
-			}, 5);
+		if (skipped > 0) {
+			frappe.show_alert(
+				{ message: __("Warning: {0} items skipped due to missing data", [skipped]), indicator: "orange" },
+				5
+			);
 		}
 	},
 
