@@ -68,7 +68,17 @@ fixtures = [
         [
             "module", "=", "Agrawa"
         ]
-    ]}
+    ]},
+    {
+        "dt": "Letter Head",
+        "filters": [
+            [
+                "name", "in", [
+                    "AgraWa Letterhead",
+                ]
+            ]
+        ]
+    },
 ]
 
 override_doctype_dashboards = {
