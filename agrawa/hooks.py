@@ -50,6 +50,11 @@ doc_events = {
 
 override_doctype_class = {
     "Purchase Order": "agrawa.overrides.purchase_order_autoname.CustomPurchaseOrder",
+    "Sales Invoice": "agrawa.overrides.custom_sales_invoice_controller.CustomSalesInvoice",
+    "Quotation": "agrawa.overrides.custom_quotation_controller.CustomQuotation",
+    "Sales Order": "agrawa.overrides.custom_sales_order_controller.CustomSalesOrder",
+
+
 }
 
 override_whitelisted_methods = {
