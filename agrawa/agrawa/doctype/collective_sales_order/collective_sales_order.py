@@ -182,6 +182,36 @@ def create_purchase_order(cso_name, customer=None):
 	po_doc.company = cso_doc.company
 	po_doc.transaction_date = cso_doc.batch_date
 	po_doc.schedule_date = cso_doc.batch_date
+	
+	# Set supplier-related fields
+	supplier_details = frappe.db.get_value(
+		"Supplier", 
+		cso_doc.supplier, 
+		["default_currency", "default_price_list", "payment_terms"], 
+		as_dict=True
+	)
+	
+	if supplier_details:
+		if supplier_details.default_currency:
+			po_doc.currency = supplier_details.default_currency
+			
+			# Get conversion rate
+			from erpnext.setup.utils import get_exchange_rate
+			company_currency = frappe.db.get_value("Company", po_doc.company, "default_currency")
+			po_doc.conversion_rate = get_exchange_rate(po_doc.currency, company_currency, args="for_buying")
+		
+		if supplier_details.default_price_list:
+			po_doc.buying_price_list = supplier_details.default_price_list
+			
+		if supplier_details.payment_terms:
+			po_doc.payment_terms_template = supplier_details.payment_terms
+	
+	# Clear/reset fields
+	po_doc.apply_discount_on = ""
+	po_doc.additional_discount_percentage = 0.0
+	po_doc.discount_amount = 0.0
+	po_doc.inter_company_order_reference = ""
+	po_doc.shipping_rule = ""
 
 	default_ptct = frappe.db.get_value(
 			"Purchase Taxes and Charges Template",
@@ -215,6 +245,8 @@ def create_purchase_order(cso_name, customer=None):
 					"row_id": t.row_id,
 				})
 
+	po_doc.run_method("set_missing_values")
+	
 	if not po_doc.taxes:
 		# po_doc.append_taxes_from_item_tax_template()
 		pass
@@ -223,11 +255,18 @@ def create_purchase_order(cso_name, customer=None):
 
 	# Add all items from all sales orders
 	has_drop_ship_items = False
+	so_docs_cache = {}  # Cache to avoid loading same SO multiple times
+	
 	for so_row in cso_doc.sales_orders:
+		if so_row.sales_order not in so_docs_cache:
+			so_docs_cache[so_row.sales_order] = frappe.get_doc("Sales Order", so_row.sales_order)
+		
+		so_doc = so_docs_cache[so_row.sales_order]
+		
 		so_items = frappe.get_all(
 			"Sales Order Item",
 			filters={"parent": so_row.sales_order, "docstatus": 1},
-			fields=["item_code", "item_name", "description", "qty", "uom", "rate", "warehouse", "name", "delivered_by_supplier"]
+			fields=["item_code", "item_name", "description", "qty", "uom", "rate", "warehouse", "name", "delivered_by_supplier", "delivery_date"]
 		)
 
 		for item in so_items:
@@ -252,10 +291,12 @@ def create_purchase_order(cso_name, customer=None):
 		# Update the current Collective Sales Order to link to the customer from the sales orders for drop shipping
 		cso_doc.customer = customer
 		po_doc.customer = cso_doc.customer
+		po_doc.customer_name = frappe.db.get_value("Customer", po_doc.customer, "customer_name")
 		
 		for so_row in cso_doc.sales_orders:
 			if so_row.customer == cso_doc.customer:
-				so_doc = frappe.get_doc("Sales Order", so_row.sales_order)
+				# Use cached SO doc if available
+				so_doc = so_docs_cache.get(so_row.sales_order) or frappe.get_doc("Sales Order", so_row.sales_order)
 				
 				# Set shipping address
 				if so_doc.shipping_address_name:
