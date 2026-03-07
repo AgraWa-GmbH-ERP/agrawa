@@ -92,3 +92,7 @@ override_doctype_dashboards = {
     "Purchase Order": "agrawa.overrides.custom_dashboard.purchase_order_dashboard",
     "Sales Invoice": "agrawa.overrides.custom_dashboard.sales_invoice_dashboard"
 }
+
+jinja = {
+    "methods": ["agrawa.utils.get_merged_so_items_from_po"]
+}
