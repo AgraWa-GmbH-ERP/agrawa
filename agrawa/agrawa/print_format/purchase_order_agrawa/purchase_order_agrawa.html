@@ -171,7 +171,8 @@
         </tr>
     </thead>
     <tbody>
-        {% for item in doc.items %}
+        {% set po_items = get_merged_so_items_from_po(doc.items) %}
+        {% for item in po_items %}
             {% set item_doc = frappe.get_doc("Item", item.item_code) %}
             {% if item_doc.supplier_items and item_doc.supplier_items|length > 0 %}
                 {% set supplier_part_no = item_doc.supplier_items[0].supplier_part_no %}

@@ -20,7 +20,7 @@ doctype_js = {
         "public/js/bio_faktii_common.js"
     ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
-    # "Purchase Order": "public/js/custom_purchase_order.js",
+    "Purchase Order": "public/js/custom_purchase_order.js",
     "Quotation": [
         "public/js/quotation.js",
         "public/js/bio_faktii_common.js",
@@ -91,4 +91,8 @@ override_doctype_dashboards = {
     "Sales Order": "agrawa.overrides.custom_dashboard.sales_order_dashboard",
     "Purchase Order": "agrawa.overrides.custom_dashboard.purchase_order_dashboard",
     "Sales Invoice": "agrawa.overrides.custom_dashboard.sales_invoice_dashboard"
+}
+
+jinja = {
+    "methods": ["agrawa.utils.get_merged_so_items_from_po"]
 }
