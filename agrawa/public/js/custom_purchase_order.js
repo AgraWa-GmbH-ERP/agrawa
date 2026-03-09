@@ -25,6 +25,7 @@ frappe.ui.form.on("Purchase Order", {
                                 <tr>
                                     <th>${__("Item Code")}</th>
                                     <th>${__("Quantity")}</th>
+                                    <th>${__("UOM")}</th>
                                     <th>${__("Rate")}</th>
                                     <th>${__("Amount")}</th>
                                 </tr>
@@ -32,10 +33,11 @@ frappe.ui.form.on("Purchase Order", {
                             <tbody>
                                 ${processed_items.map(item => `
                                     <tr>
-                                        <td>${item.item_code}</td>
-                                        <td>${item.qty}</td>
-                                        <td>${item.rate}</td>
-                                        <td>${item.amount}</td>
+                                        <td><a href="/app/item/${item.item_code}"><b>${item.item_code}: ${item.item_name}</b></a></td>
+                                        <td style="text-align: right;">${item.qty}</td>
+                                        <td>${item.uom}</td>
+                                        <td style="text-align: right;">€ ${item.rate}</td>
+                                        <td style="text-align: right;">€ ${item.amount}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
