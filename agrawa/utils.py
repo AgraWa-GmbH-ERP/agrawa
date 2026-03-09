@@ -5,7 +5,7 @@ from collections import defaultdict
 @frappe.whitelist()
 def get_merged_so_items_from_po(items):
     """
-    Merges items from a Purchase Order based on item_code, rate, and uom.
+    Merges items based on item_code, rate, and uom.
     """
     if not items:
         return []
