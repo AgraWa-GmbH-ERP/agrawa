@@ -73,6 +73,13 @@
         
     <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-right: 30px;">
         <b>{{ _("Shipped To:") }}</b><br>
+        {% if doc.shipping_address %}
+            {% set address = frappe.db.sql("""
+                SELECT address_line1, pincode, city, custom_mobile_no, phone
+                FROM `tabAddress`
+                WHERE name = %s
+            """, doc.shipping_address) %}
+        {% endif %}
         {% if ns.has_sales_order %}
             {{ doc.customer_name }}<br>
         
