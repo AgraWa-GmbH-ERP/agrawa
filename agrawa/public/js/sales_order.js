@@ -128,13 +128,14 @@ agrawa.sales_utils.split_items_by_customer = function(frm) {
                         label: __('Customer')
                     },
                     {
-                        fieldtype: 'Int',
+                        fieldtype: 'Float',
                         fieldname: 'allocated_qty',
                         in_list_view: 1,
                         columns: 1,
                         read_only: 0,
                         reqd: 1,
                         label: __('Allocated Qty'),
+                        precision: 2,
                         onchange: function() {
                             const grid_row = this.grid_row;
                             const allocated_qty = this.get_value() || 0;
