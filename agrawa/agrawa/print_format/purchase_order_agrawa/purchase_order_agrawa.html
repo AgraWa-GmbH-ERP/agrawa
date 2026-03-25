@@ -1,11 +1,4 @@
 {% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
-{% set ns = namespace(has_sales_order=False) %}
-{% for item in doc.items %}
-    {% if item.sales_order %}
-        {% set ns.has_sales_order = True %}
-    {% endif %}
-{% endfor %}
-
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
 
 {{ render_letter_head(letter_head) }}
@@ -63,47 +56,47 @@
     {% endif %}
 
     <!-- Right side -->
-    {% set address = frappe.db.sql("""
-        SELECT a.address_line1, a.pincode, a.city, a.custom_mobile_no, a.phone
-        FROM `tabAddress` a
-        JOIN `tabDynamic Link` dl ON dl.parent = a.name
-        WHERE dl.link_doctype = 'Customer' AND dl.link_name = %s
-        LIMIT 1
-        """, (doc.customer,)) %}
-        
+    {% set shipped_address_name = None %}
+    {% if doc.customer %}
+        {% set shipped_address_name = doc.shipping_address %}
+        {% if not shipped_address_name %}
+            {% set shipped_address_name = frappe.db.get_value("Customer", doc.customer, "customer_primary_address") %}
+        {% endif %}
+        {% if not shipped_address_name %}
+            {% set customer_addr = frappe.get_all(
+                "Dynamic Link",
+                filters={"link_doctype": "Customer", "link_name": doc.customer, "parenttype": "Address"},
+                pluck="parent",
+                limit_page_length=1,
+            ) %}
+            {% if customer_addr %}
+                {% set shipped_address_name = customer_addr[0] %}
+            {% endif %}
+        {% endif %}
+    {% endif %}
+
     <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-right: 30px;">
         <b>{{ _("Shipped To:") }}</b><br>
-        {% if doc.shipping_address %}
-            {% set address = frappe.db.sql("""
-                SELECT address_line1, pincode, city, custom_mobile_no, phone, address_title
-                FROM `tabAddress`
-                WHERE name = %s
-            """, doc.shipping_address) %}
-        {% endif %}
-        {% if ns.has_sales_order %}
-            {% if address[0][5] %}
-                {{ address[0][5] }}<br>
-            {% endif %}
-        
-            {# Address line #}
-            {% if address and address[0][0] %}
-                {{ address[0][0] }}<br>
-            {% endif %}
-        
-            {# Pincode + City line #}
-            {% if address and (address[0][1] or address[0][2]) %}
-                {% if address[0][1] and address[0][2] %}
-                    {{ address[0][1] }}, {{ address[0][2] }}<br>
-                {% elif address[0][1] %}
-                    {{ address[0][1] }}<br>
-                {% elif address[0][2] %}
-                    {{ address[0][2] }}<br>
+        {% if doc.customer %}
+            {% if shipped_address_name and frappe.db.exists("Address", shipped_address_name) %}
+                {% set shipped_addr = frappe.get_doc("Address", shipped_address_name) %}
+                {% set recipient = shipped_addr.address_title or doc.customer_name %}
+                {% if recipient %}
+                    {{ recipient }}<br>
                 {% endif %}
-            {% endif %}
-        
-            {# Show custom_mobile_no if present, otherwise phone #}
-            {% if address %}
-                {% set mobile = address[0][3] or address[0][4] %}
+                {% if shipped_addr.address_line1 %}
+                    {{ shipped_addr.address_line1 }}<br>
+                {% endif %}
+                {% if shipped_addr.pincode or shipped_addr.city %}
+                    {% if shipped_addr.pincode and shipped_addr.city %}
+                        {{ shipped_addr.pincode }}, {{ shipped_addr.city }}<br>
+                    {% elif shipped_addr.pincode %}
+                        {{ shipped_addr.pincode }}<br>
+                    {% elif shipped_addr.city %}
+                        {{ shipped_addr.city }}<br>
+                    {% endif %}
+                {% endif %}
+                {% set mobile = shipped_addr.custom_mobile_no or shipped_addr.phone %}
                 {% if mobile %}
                     Tel: {{ mobile }}
                 {% endif %}
