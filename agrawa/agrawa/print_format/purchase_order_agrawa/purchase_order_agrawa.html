@@ -16,8 +16,39 @@
         
         <div style="margin-top: 0.2cm;">
             <strong>{{ doc.supplier }}</strong><br>
-            {% if doc.address_display %}
-                {{ doc.address_display }}
+            {% set supplier_address_name = doc.supplier_address %}
+            {% if not supplier_address_name and doc.supplier %}
+                {% set supplier_address_name = frappe.db.get_value("Supplier", doc.supplier, "supplier_primary_address") %}
+            {% endif %}
+            {% if not supplier_address_name and doc.supplier %}
+                {% set supplier_addr = frappe.get_all(
+                    "Dynamic Link",
+                    filters={"link_doctype": "Supplier", "link_name": doc.supplier, "parenttype": "Address"},
+                    pluck="parent",
+                    limit_page_length=1,
+                ) %}
+                {% if supplier_addr %}
+                    {% set supplier_address_name = supplier_addr[0] %}
+                {% endif %}
+            {% endif %}
+
+            {% if supplier_address_name and frappe.db.exists("Address", supplier_address_name) %}
+                {% set supplier_address = frappe.get_doc("Address", supplier_address_name) %}
+                {% if supplier_address.address_line1 %}
+                    {{ supplier_address.address_line1 }}<br>
+                {% endif %}
+                {% if supplier_address.pincode or supplier_address.city %}
+                    {% if supplier_address.pincode and supplier_address.city %}
+                        {{ supplier_address.pincode }}, {{ supplier_address.city }}<br>
+                    {% elif supplier_address.pincode %}
+                        {{ supplier_address.pincode }}<br>
+                    {% elif supplier_address.city %}
+                        {{ supplier_address.city }}<br>
+                    {% endif %}
+                {% endif %}
+                {% if supplier_address.country %}
+                    {{ supplier_address.country }}
+                {% endif %}
             {% endif %}
         </div>
     </div>
