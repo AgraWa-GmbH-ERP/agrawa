@@ -14,8 +14,9 @@ app_include_js = "agrawa.bundle.js"
 
 doctype_js = {
     "Customer": "public/js/custom_customer.js",
+    "Material Request": "public/js/custom_material_request.js",
     "Sales Order": [
-        "public/js/custom_sales_order.js",
+        "public/js/sales_order.js",
         "public/js/bio_faktii_common.js"
     ],
     "Purchase Invoice": "public/js/custom_purchase_invoice.js",
@@ -28,23 +29,37 @@ doctype_js = {
         "public/js/sales_invoice.js",
         "public/js/bio_faktii_common.js"
     ],
+    # "Sales Order": "public/js/sales_order.js",
     "Print Format": "public/js/custom_print_format.js"
 
 }
 
 doc_events = {
     "Sales Invoice": {
-        "on_submit": "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing",
+        "on_submit": [
+            "agrawa.overrides.custom_sales_invoice.update_purchase_invoice_status_on_billing",
+            "agrawa.overrides.custom_sales_invoice.auto_add_sales_invoice_to_collective_order"
+        ],
+        "on_cancel": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation",
+        "on_trash": "agrawa.overrides.custom_sales_invoice.unset_sales_invoice_on_sales_order_item_allocation"
+    },
+    "Sales Order": {
+        "before_save": "agrawa.overrides.custom_sales_order.set_dropshipping_data"
     }
 }
 
 override_doctype_class = {
     "Purchase Order": "agrawa.overrides.purchase_order_autoname.CustomPurchaseOrder",
-    "Purchase Invoice": "agrawa.overrides.custom_purchase_invoice.CustomPurchaseInvoice"
+    "Sales Invoice": "agrawa.overrides.custom_sales_invoice_controller.CustomSalesInvoice",
+    "Quotation": "agrawa.overrides.custom_quotation_controller.CustomQuotation",
+    "Sales Order": "agrawa.overrides.custom_sales_order_controller.CustomSalesOrder",
+
+
 }
 
 override_whitelisted_methods = {
-	"erpnext.selling.doctype.sales_order.sales_order.make_purchase_order": "agrawa.overrides.sales_order_to_purchase_order.make_purchase_order"
+    "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order": "agrawa.overrides.sales_order_to_purchase_order.make_purchase_order",
+    "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice": "agrawa.overrides.purchase_order_autoname.make_purchase_invoice"
 }
 
 fixtures = [
@@ -58,5 +73,26 @@ fixtures = [
         [
             "module", "=", "Agrawa"
         ]
-    ]}
+    ]},
+    {
+        "dt": "Letter Head",
+        "filters": [
+            [
+                "name", "in", [
+                    "AgraWa Letterhead",
+                ]
+            ]
+        ]
+    },
 ]
+
+override_doctype_dashboards = {
+    "Purchase Invoice": "agrawa.overrides.custom_dashboard.purchase_invoice_dashboard",
+    "Sales Order": "agrawa.overrides.custom_dashboard.sales_order_dashboard",
+    "Purchase Order": "agrawa.overrides.custom_dashboard.purchase_order_dashboard",
+    "Sales Invoice": "agrawa.overrides.custom_dashboard.sales_invoice_dashboard"
+}
+
+jinja = {
+    "methods": ["agrawa.utils.get_merged_so_items_from_po"]
+}

@@ -1,56 +1,84 @@
+import json
 import frappe
-from erpnext.accounts.doctype.purchase_invoice.purchase_invoice import PurchaseInvoice
-from frappe.utils import flt, getdate
-from erpnext.accounts.doctype.sales_invoice.sales_invoice import (
-	get_total_in_party_account_currency,
-	is_overdue,
-)
+from frappe.utils import flt, cint
+from frappe.model.mapper import get_mapped_doc
 
-class CustomPurchaseInvoice(PurchaseInvoice):
-    def set_status(self, update=False, status=None, update_modified=True):
-        if self.is_new():
-            if self.get("amended_from"):
-                self.status = "Draft"
-            return
+@frappe.whitelist()
+def make_sales_invoice_from_purchase_invoice(
+	source_name,
+	target_doc=None,
+	ignore_permissions=False,
+	args=None
+):
+	if args is None:
+		args = {}
+	if isinstance(args, str):
+		args = json.loads(args)
 
-        outstanding_amount = flt(self.outstanding_amount, self.precision("outstanding_amount"))
-        total = get_total_in_party_account_currency(self)
+	def postprocess(source, target):
+		set_missing_values(source, target)
 
-        if not status:
-            if self.docstatus == 2:
-                status = "Cancelled"
-            elif self.docstatus == 1:
-                if self.is_internal_transfer():
-                    self.status = "Internal Transfer"
-                elif is_overdue(self, total):
-                    self.status = "Overdue"
-                elif 0 < outstanding_amount < total:
-                    self.status = "Partly Paid"
-                elif outstanding_amount > 0 and getdate(self.due_date) >= getdate():
-                    self.status = "Unpaid"
-                # Check if outstanding amount is 0 due to debit note issued against invoice
-                elif self.is_return == 0 and frappe.db.get_value(
-                    "Purchase Invoice", {"is_return": 1, "return_against": self.name, "docstatus": 1}
-                ):
-                    self.status = "Debit Note Issued"
-                elif self.is_return == 1:
-                    self.status = "Return"
-                elif outstanding_amount <= 0:
-                    self.status = "Paid"
-                else:
-                    self.status = "Submitted"
-                
-                # ----- Custom Billing Logic -----
-                linked_si = frappe.db.get_value("Sales Invoice", {"custom_purchase_invoice": self.name})
+	def set_missing_values(source, target):
 
-                if linked_si:
-                    if outstanding_amount > 0:
-                        self.status = "Billed"
-                    elif outstanding_amount <= 0:
-                        self.status = "Paid and Billed"
-                # -------- End -------------
-            else:
-                self.status = "Draft"
+		target.flags.ignore_permissions = True
+		target.run_method("set_missing_values")
 
-        if update:
-            self.db_set("status", self.status, update_modified=update_modified)
+		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
+
+
+	def update_item(source_row, target_row, source_parent):
+		target_row.qty = flt(source_row.qty)
+		target_row.custom_purchase_invoice = source_parent.name
+		target_row.custom_purchase_invoice_item = source_row.name
+
+	def select_item(d):
+		filtered_items = args.get("filtered_children", [])
+		return (d.name in filtered_items) if filtered_items else True
+
+	doc = get_mapped_doc(
+		"Purchase Invoice",
+		source_name,
+		{
+			"Purchase Invoice": {
+				"doctype": "Sales Invoice",
+				"validation": {"docstatus": ["=", 1]},
+				"field_no_map": [
+					"purchase_invoice",
+					"taxes_and_charges",
+					"address_display",
+					"contact_person",
+					"contact_display",
+					"contact_mobile",
+					"contact_email"],
+			},
+			"Purchase Invoice Item": {
+				"doctype": "Sales Invoice Item",
+				"field_no_map": [
+					"uom",
+					"rate",
+					"base_rate",
+					"price_list_rate",
+					"base_price_list_rate",
+					"amount",
+					"base_amount",
+					"net_rate",
+					"net_amount",
+					"base_net_rate",
+					"base_net_amount",
+					"discount_percentage",
+					"discount_amount",
+					"margin_rate_or_amount",
+					"margin_type",
+    			],
+				"postprocess": update_item,
+				"condition": lambda doc: (flt(doc.qty) != 0) and select_item(doc),
+			},
+		},
+		target_doc,
+		postprocess,
+		ignore_permissions=ignore_permissions,
+	)
+
+	return doc
+

@@ -1,0 +1,99 @@
+{# Shared print format macros for AgraWa print formats #}
+{%- macro render_letter_head(letter_head) -%}
+{% if letter_head %}
+<div class="print-format-header" id="header-html" style="height:45mm; overflow:hidden; padding:0; margin:0;">
+    {{ letter_head }}
+</div>
+{% endif %}
+{%- endmacro %}
+
+{%- macro render_company_block() -%}
+<div style="text-align: left; font-size: 11px; line-height: 1.5; margin-left: auto; margin-right:20mm;  height: 100%;">
+    <span style="color: #B2160E;"><b>AgraWa GmbH</b></span><br>
+    Sonnenbergstr. 17/1 <br>
+    D-71665 Vaihingen/Enz <br>
+    Mobil: +49 176 17942780 <br>
+    Tel.: +49 7042 2763572 <br>
+    Mail: <a href="mailto:info@agrawa.de">info@agrawa.de</a>
+</div>
+{%- endmacro %}
+
+{%- macro format_currency(value, suffix=' €') -%}
+{%- if value is none -%}
+    -
+{%- else -%}
+    {{ "{:,.2f}".format(value).replace(",", "X").replace(".", ",").replace("X", ".") }}{{ suffix }}
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro render_footer(footer) -%}
+<div id="footer-html" class="visible-pdf">
+    <div class="print-format-footer">
+        {{ footer }}
+    </div>
+</div>
+{%- endmacro %}
+
+{%- macro render_shared_styles() -%}
+<style>
+body, .print-format{
+  font-size: 12px !important;
+  font-family: Arial, sans-serif;
+  padding: 0px ;
+}
+
+/* Header padding */
+.print-format-header {
+  padding: 10px 25px; /* top-bottom 10px, left-right 25px */
+  margin: 0 auto;
+}
+
+/* Pricetable adjustments */
+.pricetable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+  table-layout: fixed;
+}
+
+.pricetable th, .pricetable td {
+  border: 1px solid #ccc;
+  padding: 6px;
+  word-wrap: break-word;
+  white-space: normal;
+  font-size: 10px; /* compact */
+}
+
+.pricetable .text-right {
+  text-align: right;
+}
+
+.pricetable thead th:nth-child(-n+5) {
+  background-color: #B2160E !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+
+.pricetable thead th:nth-child(n+6) {
+  background-color: #83AD29 !important;
+  border: 1px solid #ccc !important;
+  color: #fff !important;
+}
+.pricetable th:nth-child(2), .pricetable td:nth-child(2) .pricetable th:nth-child(3), .pricetable td:nth-child(3) { 
+  width: 3.5cm; 
+  max-width: 3.5cm; 
+  word-wrap: break-word;
+  overflow-wrap: break-word; 
+}
+.company-and-address-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  height:45mm;
+}
+.body-wrapper {
+  margin-left: 4mm;
+  margin-right: 4mm;
+}
+</style>
+{%- endmacro %}

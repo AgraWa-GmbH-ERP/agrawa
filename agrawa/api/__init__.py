@@ -1,65 +1,10 @@
+import json
 import frappe
 from frappe.model.mapper import get_mapped_doc
-
-@frappe.whitelist()
-def create_sales_invoice_from_purchase_invoice(source_name, target_doc=None):
-	def postprocess(source, target):
-		target.posting_date = source.posting_date
-		target.due_date = source.due_date
-		target.custom_delivery_date = source.custom_supplier_delivery_date
-		target.custom_purchase_invoice = source.name
-		target.taxes_and_charges = None
-		target.taxes = []
-
-		target.customer = target.contact_person = target.contact_display = None
-		for item in source.items:
-			if item.purchase_order:
-				for po_item in frappe.get_all("Purchase Order Item", filters={"parent": item.purchase_order}, fields=["sales_order"]):
-					if po_item.sales_order:
-						target.customer = frappe.db.get_value("Sales Order", po_item.sales_order, "customer")
-						break
-
-		if target.customer:
-			target.customer_address = frappe.db.get_value(
-				"Dynamic Link",
-				{"parenttype": "Address", "link_doctype": "Customer", "link_name": target.customer},
-				"parent"
-			)
-
-			target.contact_person = frappe.db.get_value(
-				"Dynamic Link",
-				{"parenttype": "Contact", "link_doctype": "Customer", "link_name": target.customer},
-				"parent"
-			)
-
-	field_map = {
-		"Purchase Invoice": {
-			"doctype": "Sales Invoice",
-			"field_map": {
-				"posting_date": "posting_date",
-				"remarks": "remarks"
-			}
-		},
-		"Purchase Invoice Item": {
-			"doctype": "Sales Invoice Item",
-			"field_map": {
-				"purchase_order": "purchase_order",
-				"po_detail": "purchase_order_item",
-			}
-		}
-	}
-
-	doc = get_mapped_doc(
-		"Purchase Invoice",
-		source_name,
-		field_map,
-		target_doc,
-		postprocess
-	)
-
-	doc.set_missing_values()
-
-	return doc
+from frappe.contacts.doctype.address.address import get_company_address
+from frappe.model.utils import get_fetch_values
+from erpnext.accounts.party import get_party_account
+from agrawa.overrides.custom_sales_order import validate_allocation_quantities
 
 
 @frappe.whitelist()
@@ -92,3 +37,116 @@ def distance_range_code_query(doctype, txt, searchfield, start, page_len, filter
         "start": start,
         "page_len": page_len
     })
+
+
+@frappe.whitelist()
+def add_alocations_and_create_invoice(sales_order, allocations):	
+	if isinstance(allocations, str):
+		allocations = json.loads(allocations)
+		allocations = [frappe._dict(allocation) for allocation in allocations]
+
+	for allocation in allocations:
+		del allocation["name"]
+	
+	so_doc = frappe.get_doc('Sales Order', sales_order)	
+
+	created_invoices = []
+	for allocation in allocations:
+		# Create Sales Invoice using get_mapped_doc
+		si = create_sales_invoice_from_allocation(so_doc, allocation)
+		
+		allocation["sales_invoice"] = si.name
+		created_invoices.append(si.name)
+		so_doc.append('custom_item_allocation', allocation)
+
+	validate_allocation_quantities(so_doc)
+	so_doc.save()
+
+	return {"sales_order": sales_order, "allocations_added": len(allocations), "created_invoices": created_invoices}
+
+
+def create_sales_invoice_from_allocation(so_doc, allocation):
+	"""Create Sales Invoice from Sales Order using get_mapped_doc"""
+	
+	def postprocess(source, target):
+		set_missing_values(source, target, allocation)
+		
+	def set_missing_values(source, target, allocation):
+		# Override customer from allocation
+		target.customer = allocation["customer"]
+		target.posting_date = frappe.utils.today()
+		target.set_posting_time = 0
+		
+		target.flags.ignore_permissions = True
+		target.run_method("set_missing_values")
+		target.run_method("set_po_nos")
+		target.run_method("calculate_taxes_and_totals")
+		target.run_method("set_use_serial_batch_fields")
+
+		if allocation["customer"] == source.customer:
+			if source.customer_address:
+				target.customer_address = source.customer_address
+			if source.contact_person:
+				target.contact_person = source.contact_person
+			if source.shipping_address_name:
+				target.shipping_address_name = source.shipping_address_name
+		
+		if source.company_address:
+			target.update({"company_address": source.company_address})
+		else:
+			target.update(get_company_address(target.company))
+
+		if target.company_address:
+			target.update(get_fetch_values("Sales Invoice", "company_address", target.company_address))
+
+		target.debit_to = get_party_account("Customer", target.customer, source.company)
+
+	def update_item(source, target, source_parent):
+		# Set item details from allocation
+		target.qty = allocation.allocated_qty
+		target.rate = allocation.rate
+		target.amount = allocation.amount
+		target.warehouse = allocation.warehouse
+		
+		if source_parent.project:
+			target.cost_center = frappe.db.get_value("Project", source_parent.project, "cost_center")
+
+	def should_map_item(source_item):
+		# Only map the specific item from the allocation
+		return source_item.item_code == allocation.item_code
+
+	si = get_mapped_doc(
+		"Sales Order",
+		so_doc.name,
+		{
+			"Sales Order": {
+				"doctype": "Sales Invoice",
+				"field_map": {
+					"party_account_currency": "party_account_currency",
+					"payment_terms_template": "payment_terms_template",
+				},
+				"field_no_map": ["payment_terms_template", "customer_address", "shipping_address_name", "address_display", "shipping_address", "contact_person", "contact_display"],
+				"validation": {"docstatus": ["=", 1]},
+			},
+			"Sales Order Item": {
+				"doctype": "Sales Invoice Item",
+				"postprocess": update_item,
+				"condition": lambda doc: should_map_item(doc),
+			},
+			"Sales Taxes and Charges": {
+				"doctype": "Sales Taxes and Charges",
+				"reset_value": True,
+			},
+			"Sales Team": {
+				"doctype": "Sales Team", 
+				"add_if_empty": True
+			},
+		},
+		None,
+		postprocess,
+		ignore_permissions=True,
+	)
+	
+	si.save()
+	
+	return si
