@@ -96,3 +96,5 @@ override_doctype_dashboards = {
 jinja = {
     "methods": ["agrawa.utils.get_merged_so_items_from_po"]
 }
+
+after_migrate = ["agrawa.setup_chromium.setup_print_designer_chromium"]
