@@ -127,14 +127,14 @@
     <table class="meta-table">
         <tr>
             <td class="title-block">
-                <h1 style="margin:0; padding:0;"><b>MAHNUNG</b></h1>
+                <h1 style="margin:0; padding:0;"><b>{{ _("Dunning") }}</b></h1>
             </td>
             <td class="info-block">
-                <b>Mahnungsnr.:</b> {{ doc.name }}<br>
-                <b>Datum:</b> {{ doc.date or doc.posting_date or frappe.utils.nowdate() }}<br>
-                {% if doc.customer %}<b>Kundennr.:</b> {{ doc.customer }}<br>{% endif %}
-                {% if doc.dunning_type %}<b>Mahnart:</b> {{ doc.dunning_type }}<br>{% endif %}
-                <b>Ihr Ansprechpartner:</b> Herr Schweikart<br>
+                <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
+                <b>{{ _("Date") }}:</b> {{ doc.date or doc.posting_date or frappe.utils.nowdate() }}<br>
+                {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
+                {% if doc.dunning_type %}<b>{{ _("Dunning Type") }}:</b> {{ doc.dunning_type }}<br>{% endif %}
+                <b>{{ _("Your Contact Person") }}:</b> Herr Schweikart<br>
                 +49 176 17942780
             </td>
         </tr>
@@ -144,16 +144,21 @@
 
     {% if doc.contact_person %}
         {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        Sehr geehrter {{ contact.salutation or "" }} {{ contact.last_name or "" }},
+        {% if contact.salutation == "Frau" %}
+            {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
+        {% elif contact.salutation == "Herr" %}
+            {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
+        {% else %}
+            {{ _("Dear Sir or Madam") }},
+        {% endif %}
     {% else %}
-        Sehr geehrte Damen und Herren,
+        {{ _("Dear Sir or Madam") }},
     {% endif %}
 
     <div class="spacer-10"></div>
 
     <div style="line-height:1.7;">
-        wir haben festgestellt, dass die unten aufgeführte(n) Rechnung(en) trotz Fälligkeit noch nicht vollständig ausgeglichen wurde(n).
-        Wir bitten Sie, den offenen Betrag kurzfristig unter Angabe der jeweiligen Rechnungsnummer zu begleichen.
+        {{ _("We have noted that the invoice(s) listed below have not been fully settled despite being due. We kindly request that you settle the outstanding amount promptly, stating the respective invoice number.") }}
     </div>
 
     <div class="spacer-10"></div>
@@ -165,13 +170,13 @@
         <table class="dunning-table">
             <thead>
                 <tr>
-                    <th style="width:6%;">Pos.</th>
-                    <th style="{% if show_interest %}width:28%;{% else %}width:34%;{% endif %}">Rechnung</th>
-                    <th style="width:14%;">Mahnstufe</th>
-                    <th style="width:14%;">Tage</th>
-                    <th style="{% if show_interest %}width:19%;{% else %}width:32%;{% endif %}" class="text-right">Offen</th>
+                    <th style="width:6%;">{{ _("Pos.") }}</th>
+                    <th style="{% if show_interest %}width:28%;{% else %}width:34%;{% endif %}">{{ _("Invoice") }}</th>
+                    <th style="width:14%;">{{ _("Dunning Level") }}</th>
+                    <th style="width:14%;">{{ _("Days") }}</th>
+                    <th style="{% if show_interest %}width:19%;{% else %}width:32%;{% endif %}" class="text-right">{{ _("Outstanding") }}</th>
                     {% if show_interest %}
-                    <th style="width:19%;" class="text-right">Zinsen</th>
+                    <th style="width:19%;" class="text-right">{{ _("Interest") }}</th>
                     {% endif %}
                 </tr>
             </thead>
@@ -190,7 +195,7 @@
                 {% endfor %}
 
                 <tr class="totals-row">
-                    <td colspan="4" class="text-right">Gesamt offen</td>
+                    <td colspan="4" class="text-right">{{ _("Total Outstanding") }}</td>
                     <td class="text-right">{{ doc.get_formatted("total_outstanding") if doc.total_outstanding else "0.00" }}</td>
                     {% if show_interest %}
                     <td class="text-right">{{ doc.get_formatted("total_interest") }}</td>
@@ -199,7 +204,7 @@
 
                 {% if doc.dunning_fee and doc.dunning_fee != 0 %}
                 <tr class="totals-row">
-                    <td colspan="4" class="text-right">Mahngebühr</td>
+                    <td colspan="4" class="text-right">{{ _("Dunning Fee") }}</td>
                     <td class="text-right">{{ doc.get_formatted("dunning_fee") }}</td>
                     {% if show_interest %}
                     <td></td>
@@ -208,7 +213,7 @@
                 {% endif %}
 
                 <tr class="totals-row">
-                    <td colspan="4" class="text-right">Gesamtbetrag</td>
+                    <td colspan="4" class="text-right">{{ _("Grand Total") }}</td>
                     <td class="text-right">{{ doc.get_formatted("grand_total") if doc.grand_total else "0.00" }}</td>
                     {% if show_interest %}
                     <td></td>
@@ -228,10 +233,9 @@
     <div class="spacer-10"></div>
     {% else %}
     <div style="line-height:1.7;">
-        Bitte beachten Sie, dass sich Ihre Zahlung möglicherweise mit dieser Mahnung gekreuzt hat.
-        Sollte der Betrag bereits beglichen worden sein, betrachten Sie dieses Schreiben bitte als gegenstandslos.
+        {{ _("Please note that your payment may have crossed with this reminder. If the amount has already been settled, please consider this letter as void.") }}
         <br><br>
-        Sofern noch kein Zahlungsausgleich erfolgt ist, bitten wir um kurzfristige Überweisung des offenen Betrages.
+        {{ _("If payment has not yet been made, we kindly request prompt transfer of the outstanding amount.") }}
     </div>
     {% endif %}
 
@@ -246,8 +250,8 @@
 
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        Bei Rückfragen stehen wir selbstverständlich jederzeit gerne zur Verfügung. <br>
-        Mit freundlichen Grüßen:<br> 
+        {{ _("If you have any questions, we are of course always happy to help.") }} <br>
+        {{ _("Kind regards") }}:<br> 
         {% if user_details %}
             {% if user_details.signature %}
                 <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
