@@ -1,0 +1,268 @@
+<style>
+    .print-format {
+        font-size: 11px;
+        color: #000;
+    }
+
+    .print-format table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .print-format .meta-table td,
+    .print-format .dunning-table td,
+    .print-format .dunning-table th {
+        padding: 6px 6px;
+        vertical-align: top;
+    }
+
+    .print-format .text-right {
+        text-align: right;
+    }
+
+    .print-format .address-block {
+        width: 55%;
+        vertical-align: top;
+    }
+
+    .print-format .company-block {
+        width: 35%;
+        vertical-align: top;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .print-format .title-block {
+        width: 50%;
+        vertical-align: top;
+    }
+
+    .print-format .info-block {
+        width: 50%;
+        vertical-align: top;
+        font-size: 12px;
+        line-height: 1.6;
+    }
+
+    .print-format .dunning-table {
+        width: 100%;
+        margin-top: 10px;
+        table-layout: fixed;
+    }
+
+    .print-format .dunning-table th,
+    .print-format .dunning-table td {
+        border: 1px solid #d9d9d9;
+        word-wrap: break-word;
+    }
+
+    .print-format .dunning-table th {
+        background: #f3f3f3;
+        font-weight: bold;
+    }
+
+    .print-format .totals-row td {
+        font-weight: bold;
+        background: #fafafa;
+    }
+
+    .print-format .spacer-10 {
+        height: 10px;
+    }
+
+    .print-format .spacer-20 {
+        height: 20px;
+    }
+
+    .avoid-break {
+        page-break-inside: avoid;
+    }
+</style>
+
+
+{% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
+
+<!-- LETTER HEAD -->
+{% if letter_head %}
+<div id="header-html" style="margin: 0 0 8mm 0;">
+    {{ letter_head }}
+</div>
+{% endif %}
+
+<!-- Address + company -->
+<table class="meta-table" style="margin-left:10mm; margin-right:10mm; margin-top:2mm;">
+    <tr>
+        <td class="address-block">
+            <div style="font-size:10px; margin-bottom:6mm;">
+                <span style="color:#A11929;">AgraWa GmbH</span>
+                <span style="color:green;">|</span>
+                <span style="color:#A11929;">Sonnenbergstr. 17/1</span>
+                <span style="color:green;">|</span>
+                <span style="color:#A11929;">71665 Vaihingen/Enz</span>
+            </div>
+
+            <div>
+                <strong>{{ doc.customer_name or "" }}</strong><br>
+                {% if doc.address_display %}
+                    {{ doc.address_display }}
+                {% endif %}
+            </div>
+        </td>
+
+        <td class="company-block">
+            <span style="color:#A11929;"><b>AgraWa GmbH</b></span><br>
+            Sonnenbergstr. 17/1<br>
+            D-71665 Vaihingen/Enz<br>
+            Mobil: +49 176 17942780<br>
+            Tel.: +49 7042 2763572<br>
+            Mail: <a href="mailto:info@agrawa.de">info@agrawa.de</a>
+        </td>
+    </tr>
+</table>
+
+<!-- BODY -->
+<div style="margin-left:10mm; margin-right:10mm; margin-top:8mm;">
+
+    <!-- Title + meta -->
+    <table class="meta-table">
+        <tr>
+            <td class="title-block">
+                <h1 style="margin:0; padding:0;"><b>MAHNUNG</b></h1>
+            </td>
+            <td class="info-block">
+                <b>Mahnungsnr.:</b> {{ doc.name }}<br>
+                <b>Datum:</b> {{ doc.date or doc.posting_date or frappe.utils.nowdate() }}<br>
+                {% if doc.customer %}<b>Kundennr.:</b> {{ doc.customer }}<br>{% endif %}
+                {% if doc.dunning_type %}<b>Mahnart:</b> {{ doc.dunning_type }}<br>{% endif %}
+                <b>Ihr Ansprechpartner:</b> Herr Schweikart<br>
+                +49 176 17942780
+            </td>
+        </tr>
+    </table>
+
+    <div class="spacer-20"></div>
+
+    {% if doc.contact_person %}
+        {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
+        Sehr geehrter {{ contact.salutation or "" }} {{ contact.last_name or "" }},
+    {% else %}
+        Sehr geehrte Damen und Herren,
+    {% endif %}
+
+    <div class="spacer-10"></div>
+
+    <div style="line-height:1.7;">
+        wir haben festgestellt, dass die unten aufgeführte(n) Rechnung(en) trotz Fälligkeit noch nicht vollständig ausgeglichen wurde(n).
+        Wir bitten Sie, den offenen Betrag kurzfristig unter Angabe der jeweiligen Rechnungsnummer zu begleichen.
+    </div>
+
+    <div class="spacer-10"></div>
+
+    {% set show_interest = doc.total_interest and doc.total_interest != 0 %}
+
+    {% if doc.overdue_payments %}
+    <div class="avoid-break">
+        <table class="dunning-table">
+            <thead>
+                <tr>
+                    <th style="width:6%;">Pos.</th>
+                    <th style="{% if show_interest %}width:28%;{% else %}width:34%;{% endif %}">Rechnung</th>
+                    <th style="width:14%;">Mahnstufe</th>
+                    <th style="width:14%;">Tage</th>
+                    <th style="{% if show_interest %}width:19%;{% else %}width:32%;{% endif %}" class="text-right">Offen</th>
+                    {% if show_interest %}
+                    <th style="width:19%;" class="text-right">Zinsen</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in doc.overdue_payments %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ row.sales_invoice or "" }}</td>
+                    <td>{{ row.dunning_level or "" }}</td>
+                    <td>{{ row.overdue_days or 0 }}</td>
+                    <td class="text-right">{{ "{:,.2f}".format(row.outstanding or 0) }}</td>
+                    {% if show_interest %}
+                    <td class="text-right">{{ "{:,.2f}".format(row.interest or 0) }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">Gesamt offen</td>
+                    <td class="text-right">{{ doc.get_formatted("total_outstanding") if doc.total_outstanding else "0.00" }}</td>
+                    {% if show_interest %}
+                    <td class="text-right">{{ doc.get_formatted("total_interest") }}</td>
+                    {% endif %}
+                </tr>
+
+                {% if doc.dunning_fee and doc.dunning_fee != 0 %}
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">Mahngebühr</td>
+                    <td class="text-right">{{ doc.get_formatted("dunning_fee") }}</td>
+                    {% if show_interest %}
+                    <td></td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">Gesamtbetrag</td>
+                    <td class="text-right">{{ doc.get_formatted("grand_total") if doc.grand_total else "0.00" }}</td>
+                    {% if show_interest %}
+                    <td></td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="spacer-20"></div>
+
+    {% if doc.body_text %}
+    <div style="line-height:1.7;">
+        {{ doc.body_text }}
+    </div>
+    <div class="spacer-10"></div>
+    {% else %}
+    <div style="line-height:1.7;">
+        Bitte beachten Sie, dass sich Ihre Zahlung möglicherweise mit dieser Mahnung gekreuzt hat.
+        Sollte der Betrag bereits beglichen worden sein, betrachten Sie dieses Schreiben bitte als gegenstandslos.
+        <br><br>
+        Sofern noch kein Zahlungsausgleich erfolgt ist, bitten wir um kurzfristige Überweisung des offenen Betrages.
+    </div>
+    {% endif %}
+
+    <div class="spacer-20"></div>
+
+    {% if doc.closing_text %}
+    <div style="line-height:1.7;">
+        {{ doc.closing_text }}
+    </div>
+    <div class="spacer-10"></div>
+    {% endif %}
+
+    <!-- Greeting -->
+    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
+        Bei Rückfragen stehen wir selbstverständlich jederzeit gerne zur Verfügung. <br>
+        Mit freundlichen Grüßen:<br> 
+        {% if user_details %}
+            {% if user_details.signature %}
+                <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
+                    <img src="{{ user_details.signature }}" alt="Logo" style="width: 150px; height: auto;">
+                </div>
+            {% endif %}
+            {{ user_details.full_name if user_details.full_name else '' }}
+        {% endif %}  
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<div id="footer-html" class="visible-pdf">
+    <div class="print-format-footer">
+        {{ footer }}
+    </div>
+</div>
