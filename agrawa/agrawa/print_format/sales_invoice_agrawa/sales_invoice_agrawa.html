@@ -1,4 +1,4 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date %}
 {{ render_letter_head(letter_head) }}
 
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
@@ -68,10 +68,10 @@
             {% if first_si_item and first_si_item.sales_order %}
                 {% set so = frappe.get_doc("Sales Order", first_si_item.sales_order) %}
                 <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
-                <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
+                <b>{{ _("Order Date") }}: </b>{{ format_date(so.transaction_date) }}<br>
             {% endif %}
             {% if doc.custom_supplier_delivery_date %}
-                <b>Lieferdatum: </b>{{ doc.custom_supplier_delivery_date }}<br>
+                <b>{{ _("Delivery Date") }}: </b>{{ format_date(doc.custom_supplier_delivery_date) }}<br>
             {% endif %}
             <b>Kundennr.: </b>{{ doc.customer }}<br>
             <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>
@@ -86,7 +86,7 @@
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
-                    <p><b>{{doc.due_date}}</b></p>
+                    <p><b>{{format_date(doc.due_date)}}</b></p>
         </div>
     </div>
     <br>

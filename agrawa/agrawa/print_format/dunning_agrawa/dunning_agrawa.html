@@ -1,3 +1,4 @@
+{% from "agrawa/print_format/includes/print_macros.html" import format_date %}
 <style>
     .print-format {
         font-size: 11px;
@@ -131,7 +132,7 @@
             </td>
             <td class="info-block">
                 <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
-                <b>{{ _("Date") }}:</b> {{ doc.date or doc.posting_date or frappe.utils.nowdate() }}<br>
+                <b>{{ _("Date") }}:</b> {{ format_date(doc.date or doc.posting_date or frappe.utils.nowdate()) }}<br>
                 {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
                 {% if doc.dunning_type %}<b>{{ _("Dunning Type") }}:</b> {{ doc.dunning_type }}<br>{% endif %}
                 <b>{{ _("Your Contact Person") }}:</b> Herr Schweikart<br>
