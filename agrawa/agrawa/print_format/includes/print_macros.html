@@ -26,6 +26,23 @@
 {%- endif -%}
 {%- endmacro %}
 
+{%- macro format_date(date_value) -%}
+{%- if date_value -%}
+    {%- if date_value is string -%}
+        {%- set date_parts = date_value.split('-') -%}
+        {%- if date_parts|length == 3 -%}
+            {{ date_parts[2] }}.{{ date_parts[1] }}.{{ date_parts[0] }}
+        {%- else -%}
+            {{ date_value }}
+        {%- endif -%}
+    {%- else -%}
+        {{ date_value.strftime('%d.%m.%Y') if date_value.strftime else date_value }}
+    {%- endif -%}
+{%- else -%}
+    -
+{%- endif -%}
+{%- endmacro %}
+
 {%- macro render_footer(footer) -%}
 <div id="footer-html" class="visible-pdf">
     <div class="print-format-footer">
