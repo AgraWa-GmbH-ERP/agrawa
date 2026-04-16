@@ -92,7 +92,17 @@
     <br>
     {% if doc.contact_person %}
         {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        Sehr geehrter {{contact.salutation or ""}} {{ contact.last_name or "" }},
+        {% if contact.salutation and contact.last_name %}
+            {% if contact.salutation == "Herr" %}
+                Sehr geehrter Herr {{ contact.last_name }},
+            {% elif contact.salutation == "Frau" %}
+                Sehr geehrte Frau {{ contact.last_name }},
+            {% else %}
+                Sehr geehrte Damen und Herren,
+            {% endif %}
+        {% else %}
+            Sehr geehrte Damen und Herren,
+        {% endif %}
     {% else %}
         Sehr geehrter Damen und Herren,
     {% endif %}
