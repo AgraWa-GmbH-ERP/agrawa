@@ -29,31 +29,36 @@
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
-        <h1><b>ANGEBOT</b></h1>
+        <h1><b>{{ _("QUOTATION") }}</b></h1>
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
-            <b>Angebotsnr.: </b>{{doc.name}}<br>
-            <b>Angebotsdatum: </b>{{format_date(doc.transaction_date)}}<br>
+            <b>{{ _("Quote No.") }}: </b>{{doc.name}}<br>
+            <b>{{ _("Quote Date") }}: </b>{{format_date(doc.transaction_date)}}<br>
             {% if doc.custom_delivery_date %}
-                <b>Lieferdatum: </b>{{ format_date(doc.custom_delivery_date) }}<br>
+                <b>{{ _("Delivery Date") }}: </b>{{ format_date(doc.custom_delivery_date) }}<br>
             {% endif %}
-            <b>Kundennr.: </b>{{doc.party_name}}<br>
-            <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>+49 176 17942780<br>
+            <b>{{ _("Customer No.") }}: </b>{{doc.party_name}}<br>
+            <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
         </div>
     </div>
     <br>
 
     {% if doc.contact_person %}
         {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        Sehr geehrter {{contact.salutation or ""}} {{ contact.last_name or "" }},
+        {% if contact.salutation == "Herr" %}
+            {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
+        {% elif contact.salutation == "Frau" %}
+            {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
+        {% else %}
+            {{ _("Dear Sir or Madam") }},
+        {% endif %}
     {% else %}
-        Sehr geehrter Damen und Herren,
+        {{ _("Dear Sir or Madam") }},
     {% endif %}
 
     <br>
-    vielen Dank für Ihr Interesse. Ich freue mich sehr, Ihnen das folgende Angebot unterbreiten zu können:
-    Das Angebot ist freibleibend.
+    {{ _("Thank you for your interest. I am pleased to present you with the following offer. This offer is subject to change.") }}
     <br><br>
 
     <table class=" table-sm pricetable" >
@@ -65,7 +70,7 @@
             <th style="width:1.5cm;">{{ _("Packing Unit") }}</th>
             <th style="width:1.5cm;">{{ _("Item Number") }}</th>
             <th style="width:2.0cm;" class="text-right">{{ _("Sales Price") }}</th>
-            <th style="width:1.5cm;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:1.5cm;" class="text-right">{{ _("Quantity / Unit") }}</th>
             <th style="width:1.0cm;" class="text-right">{{ _("Pricing Unit") }}</th>
             <th style="width:2.5cm;" class="text-right">{{ _("Total Amount") }}</th>
         </tr>
@@ -134,8 +139,8 @@
 
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        Wir freuen uns, sollte dieses Angebot Ihre Zustimmung finden. Bei Rückfragen stehen wir Ihnen gerne zur Verfügung. <br>
-        Mit freundlichen Grüßen:<br>
+        {{ _("We look forward to your approval of this offer. If you have any questions, please do not hesitate to contact us.") }} <br>
+        {{ _("Kind regards") }}:<br>
         {% if user_details %}
             {% if user_details.signature %}
                 <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
