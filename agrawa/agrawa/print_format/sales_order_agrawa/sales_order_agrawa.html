@@ -30,31 +30,36 @@
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
-        <h1><b>AUFTRAGSBESTÄTIGUNG</b></h1>
+        <h1><b>{{ _("ORDER CONFIRMATION") }}</b></h1>
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
-            <b>Angebotsnr.: </b>{{doc.name}}<br>
-            <b>Angebotsdatum: </b>{{format_date(doc.transaction_date)}}<br>
+            <b>{{ _("Order No.") }}: </b>{{doc.name}}<br>
+            <b>{{ _("Order Date") }}: </b>{{format_date(doc.transaction_date)}}<br>
             {% if doc.custom_dispatch_date %}
-                <b>Lieferdatum: </b>{{ format_date(doc.custom_dispatch_date) }}<br>
+                <b>{{ _("Delivery Date") }}: </b>{{ format_date(doc.custom_dispatch_date) }}<br>
             {% endif %}
-            <b>Kundennr.: </b>{{doc.customer }}<br>
-            <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>+49 176 17942780<br>
+            <b>{{ _("Customer No.") }}: </b>{{doc.customer }}<br>
+            <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
         </div>
     </div>
     <br>
 
     {% if doc.contact_person %}
         {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        Sehr geehrter {{contact.salutation or ""}} {{ contact.last_name or "" }},
+        {% if contact.salutation == "Herr" %}
+            {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
+        {% elif contact.salutation == "Frau" %}
+            {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
+        {% else %}
+            {{ _("Dear Sir or Madam") }},
+        {% endif %}
     {% else %}
-        Sehr geehrter Damen und Herren,
+        {{ _("Dear Sir or Madam") }},
     {% endif %}
 
     <br>
-    Vielen Dank für Ihren Auftrag. Ich freue mich sehr, Ihnen heute den folgenden Auftrag bestätigen zu können.
-        Sie setzen mit der AgraWa GmbH auf den richtigen Partner. Hier alle Vereinbarungen in der Übersicht:
+    {{ _("Thank you for your order. I am pleased to confirm the following order today. You are relying on the right partner with AgraWa GmbH. Here is an overview of all agreements:") }}
     <br><br>
 
     <table class=" table-sm pricetable" >
@@ -66,7 +71,7 @@
             <th style="width:1.5cm;">{{ _("Packing Unit") }}</th>
             <th style="width:1.5cm;">{{ _("Item Number") }}</th>
             <th style="width:2.0cm;" class="text-right">{{ _("Sales Price") }}</th>
-            <th style="width:1.5cm;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:1.5cm;" class="text-right">{{ _("Quantity / Unit") }}</th>
             <th style="width:1.0cm;" class="text-right">{{ _("Pricing Unit") }}</th>
             <th style="width:2.5cm;" class="text-right">{{ _("Total Amount") }}</th>
         </tr>
@@ -135,8 +140,8 @@
     <br>
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        Bei Rückfragen stehen wir selbstverständlich jederzeit gerne zur Verfügung. <br>
-        Mit freundlichen Grüßen:<br> 
+        {{ _("If you have any questions, we are of course always happy to help.") }} <br>
+        {{ _("Kind regards") }}:<br> 
         {% if user_details %}
             {% if user_details.signature %}
                 <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
