@@ -57,13 +57,12 @@
 </div>
 
 <!-- BODY Wrapper -->
-<div><h1 style="text-align: center;"><b>BESTELLUNG</b></h1></div>
+<div><h1 style="text-align: center;"><b>{{ _("PURCHASE ORDER") }}</b></h1></div>
 <br>
 <div class="body-wrapper">
     <h3>{{ _("Customer No.") }}: {{doc.custom_customer_no}}</h3>
-    <div>Die folgende Nummer muss auf allen Dokumenten,<br>
-            Frachtpapieren und Rechnungen aufgeführt sein:<br>
-            <b>AUFTRAGSNUMMER: {{doc.name}}</b>
+    <div>{{ _("The following number must be listed on all documents, shipping papers and invoices:") }}<br>
+            <b>{{ _("ORDER NUMBER") }}: {{doc.name}}</b>
             </div>
     <br>
  <div style="display: flex; justify-content: space-between; align-items: flex-start;">
@@ -197,8 +196,8 @@
             <th style="width:3.0cm;">{{ _("Description") }}</th>
             <th style="width:1.5cm;">{{ _("Packing Unit") }}</th>
             <th style="width:1.5cm;">{{ _("Supplier Item No") }}</th>
-            <th style="width:2.0cm;" class="text-right">{{ _("Preis / EH") }}</th>
-            <th style="width:1.5cm;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:2.0cm;" class="text-right">{{ _("Price / Unit") }}</th>
+            <th style="width:1.5cm;" class="text-right">{{ _("Quantity / Unit") }}</th>
             <th style="width:1.0cm;" class="text-right">{{ _("Pricing Unit") }}</th>
             <th style="width:2.5cm;" class="text-right">{{ _("Total Amount") }}</th>
         </tr>
@@ -269,8 +268,8 @@
     <br>
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        <p>Vielen Dank im Voraus.</p>
-        <p>Mit freundlichen Grüßen,</p><br> 
+        <p>{{ _("Thank you in advance.") }}</p>
+        <p>{{ _("Kind regards") }},</p><br> 
         {% if user_details %}
             {% if user_details.signature %}
                 <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
