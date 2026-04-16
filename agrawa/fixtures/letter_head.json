@@ -1,11 +1,11 @@
 [
  {
   "align": "Right",
-  "content": "<div style=\"width: 100%; display: flex; justify-content: flex-end; margin: 0 2cm 0 2.5cm;\">\n    <img src=\"/files/Bildschirmfoto 2025-09-16%20um%2012.02.42.png\" alt=\"Logo\" style=\"width: 250px; height: 100px; margin-right:170px; object-fit: contain;\">\n</div>",
+  "content": "<div style=\"width: 100%; display: flex; justify-content: flex-end; margin: 0 2cm 0 2.5cm;\">\n    <img src=\"/assets/agrawa/png/agrawa-logo.png\" alt=\"Logo\" style=\"width: 250px; height: 100px; margin-right:170px; object-fit: contain;\">\n</div>",
   "disabled": 0,
   "docstatus": 0,
   "doctype": "Letter Head",
-  "footer": "\n<div class=\"myFooterCol\" style=\"width: 100%; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;\">\n<div style=\"text-align: center; max-width: 90%; margin: 0 auto; font-size: 13px;\">\n    Bank: Grenke Bank AG <span style=\"color: green;\">|</span> \n    IBAN: DE292013 0400 0060 3008 60 <span style=\"color: green;\">|</span> \n    BIC: GREBDEH1 <br> \n    Steuernummer: 55001/29909 <span style=\"color: green;\">|</span> \n    FA Bietigheim-Bissingen <span style=\"color: green;\">|</span> \n    USt-ID: DE356715295 <br>\n    Handelsregister: HRB 786929 <span style=\"color: green;\">|</span> \n    Amtsgericht Stuttgart <span style=\"color: green;\">|</span> \n    Geschäftsführer: Steffen Schweikart\n</div>\n\n{% if doc.doctype in [\"Quotation\", \"Sales Order\", \"Delivery Note\", \"Sales Invoice\"] %}\n<div style=\"text-align: center; font-size: 12px; padding-bottom: 20px;\">\n    <img src=\"/files/EU-organic_Logo-2000.png\" alt=\"EU Bio Logo\" style=\"height: 30px; vertical-align: middle; margin-right: 6px;\">\n    <span>\n        Bio-zertifiziert | Kontrollstelle DE-ÖKO-007\n    </span>\n</div>\n{% endif %}\n</div>",
+  "footer": "\n<div class=\"myFooterCol\" style=\"width: 100%; font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;\">\n<div style=\"text-align: center; max-width: 90%; margin: 0 auto; font-size: 13px;\">\n    Bank: Grenke Bank AG <span style=\"color: green;\">|</span> \n    IBAN: DE292013 0400 0060 3008 60 <span style=\"color: green;\">|</span> \n    BIC: GREBDEH1 <br> \n    Steuernummer: 55001/29909 <span style=\"color: green;\">|</span> \n    FA Bietigheim-Bissingen <span style=\"color: green;\">|</span> \n    USt-ID: DE356715295 <br>\n    Handelsregister: HRB 786929 <span style=\"color: green;\">|</span> \n    Amtsgericht Stuttgart <span style=\"color: green;\">|</span> \n    Geschäftsführer: Steffen Schweikart\n</div>\n\n{% if doc.doctype in [\"Quotation\", \"Sales Order\", \"Delivery Note\", \"Sales Invoice\"] %}\n<div style=\"text-align: center; font-size: 12px; padding-bottom: 20px;\">\n    <img src=\"/assets/agrawa/png/EU-organic_Logo-2000.png\" alt=\"EU Bio Logo\" style=\"height: 30px; vertical-align: middle; margin-right: 6px;\">\n    <span>\n        Bio-zertifiziert | Kontrollstelle DE-ÖKO-007\n    </span>\n</div>\n{% endif %}\n</div>",
   "footer_align": "Left",
   "footer_image": null,
   "footer_image_height": 0.0,
@@ -18,7 +18,7 @@
   "image_width": 0.0,
   "is_default": 1,
   "letter_head_name": "AgraWa Letterhead",
-  "modified": "2026-04-07 15:13:06.283732",
+  "modified": "2026-04-16 12:39:40.775775",
   "name": "AgraWa Letterhead",
   "source": "HTML"
  }
