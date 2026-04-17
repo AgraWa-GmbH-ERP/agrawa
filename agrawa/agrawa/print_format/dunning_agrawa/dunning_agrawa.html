@@ -1,146 +1,44 @@
-{% from "agrawa/print_format/includes/print_macros.html" import format_date %}
-<style>
-    .print-format {
-        font-size: 11px;
-        color: #000;
-    }
-
-    .print-format table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    .print-format .meta-table td,
-    .print-format .dunning-table td,
-    .print-format .dunning-table th {
-        padding: 6px 6px;
-        vertical-align: top;
-    }
-
-    .print-format .text-right {
-        text-align: right;
-    }
-
-    .print-format .address-block {
-        width: 55%;
-        vertical-align: top;
-    }
-
-    .print-format .company-block {
-        width: 35%;
-        vertical-align: top;
-        font-size: 11px;
-        line-height: 1.5;
-    }
-
-    .print-format .title-block {
-        width: 50%;
-        vertical-align: top;
-    }
-
-    .print-format .info-block {
-        width: 50%;
-        vertical-align: top;
-        font-size: 12px;
-        line-height: 1.6;
-    }
-
-    .print-format .dunning-table {
-        width: 100%;
-        margin-top: 10px;
-        table-layout: fixed;
-    }
-
-    .print-format .dunning-table th,
-    .print-format .dunning-table td {
-        border: 1px solid #d9d9d9;
-        word-wrap: break-word;
-    }
-
-    .print-format .dunning-table th {
-        background: #f3f3f3;
-        font-weight: bold;
-    }
-
-    .print-format .totals-row td {
-        font-weight: bold;
-        background: #fafafa;
-    }
-
-    .print-format .spacer-10 {
-        height: 10px;
-    }
-
-    .print-format .spacer-20 {
-        height: 20px;
-    }
-
-    .avoid-break {
-        page-break-inside: avoid;
-    }
-</style>
-
-
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date %}
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
 
-<!-- LETTER HEAD -->
-{% if letter_head %}
-<div id="header-html" style="margin: 0 0 8mm 0;">
-    {{ letter_head }}
+{{ render_letter_head(letter_head) }}
+
+<!-- Address + Company info section -->
+<div class="company-and-address-info">
+
+    <!-- Left side (address block inside window) -->
+    <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
+        <span style="color: #B2160E;">AgraWa GmbH</span> 
+        <span style="color: 83AD29;">|</span> 
+        <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
+        <span style="color: 83AD29;">|</span> 
+        <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
+        
+        <div style="margin-top: 0.2cm;">
+            <strong>{{ doc.customer_name or "" }}</strong><br>
+            {% if doc.address_display %}
+                {{ doc.address_display }}
+            {% endif %}
+        </div>
+    </div>
+
+    {{ render_company_block() }}
 </div>
-{% endif %}
 
-<!-- Address + company -->
-<table class="meta-table" style="margin-left:10mm; margin-right:10mm; margin-top:2mm;">
-    <tr>
-        <td class="address-block">
-            <div style="font-size:10px; margin-bottom:6mm;">
-                <span style="color:#A11929;">AgraWa GmbH</span>
-                <span style="color:green;">|</span>
-                <span style="color:#A11929;">Sonnenbergstr. 17/1</span>
-                <span style="color:green;">|</span>
-                <span style="color:#A11929;">71665 Vaihingen/Enz</span>
-            </div>
+<!-- BODY Wrapper -->
+<div class="body-wrapper">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <!-- Left side -->
+        <h1><b>{{ _("Dunning") }}</b></h1>
 
-            <div>
-                <strong>{{ doc.customer_name or "" }}</strong><br>
-                {% if doc.address_display %}
-                    {{ doc.address_display }}
-                {% endif %}
-            </div>
-        </td>
-
-        <td class="company-block">
-            <span style="color:#A11929;"><b>AgraWa GmbH</b></span><br>
-            Sonnenbergstr. 17/1<br>
-            D-71665 Vaihingen/Enz<br>
-            Mobil: +49 176 17942780<br>
-            Tel.: +49 7042 2763572<br>
-            Mail: <a href="mailto:info@agrawa.de">info@agrawa.de</a>
-        </td>
-    </tr>
-</table>
-
-<!-- BODY -->
-<div style="margin-left:10mm; margin-right:10mm; margin-top:8mm;">
-
-    <!-- Title + meta -->
-    <table class="meta-table">
-        <tr>
-            <td class="title-block">
-                <h1 style="margin:0; padding:0;"><b>{{ _("Dunning") }}</b></h1>
-            </td>
-            <td class="info-block">
-                <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
-                <b>{{ _("Date") }}:</b> {{ format_date(doc.date or doc.posting_date or frappe.utils.nowdate()) }}<br>
-                {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
-                {% if doc.dunning_type %}<b>{{ _("Dunning Type") }}:</b> {{ doc.dunning_type }}<br>{% endif %}
-                <b>{{ _("Your Contact Person") }}:</b> Herr Schweikart<br>
-                +49 176 17942780
-            </td>
-        </tr>
-    </table>
-
+        <!-- Right side -->
+        <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
+            <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
+            <b>{{ _("Date") }}:</b> {{ format_date(doc.date or doc.posting_date or frappe.utils.nowdate()) }}<br>
+            {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
+            <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
+        </div>
+    </div>
     <div class="spacer-20"></div>
 
     {% if doc.contact_person %}
@@ -188,25 +86,25 @@
                     <td>{{ row.sales_invoice or "" }}</td>
                     <td>{{ row.dunning_level or "" }}</td>
                     <td>{{ row.overdue_days or 0 }}</td>
-                    <td class="text-right">{{ "{:,.2f}".format(row.outstanding or 0) }}</td>
+                    <td class="text-right">{{ format_currency(row.outstanding or 0) }}</td>
                     {% if show_interest %}
-                    <td class="text-right">{{ "{:,.2f}".format(row.interest or 0) }}</td>
+                    <td class="text-right">{{ format_currency(row.interest or 0) }}</td>
                     {% endif %}
                 </tr>
                 {% endfor %}
 
                 <tr class="totals-row">
                     <td colspan="4" class="text-right">{{ _("Total Outstanding") }}</td>
-                    <td class="text-right">{{ doc.get_formatted("total_outstanding") if doc.total_outstanding else "0.00" }}</td>
+                    <td class="text-right">{{ format_currency(doc.total_outstanding or 0) }}</td>
                     {% if show_interest %}
-                    <td class="text-right">{{ doc.get_formatted("total_interest") }}</td>
+                    <td class="text-right">{{ format_currency(doc.total_interest or 0) }}</td>
                     {% endif %}
                 </tr>
 
                 {% if doc.dunning_fee and doc.dunning_fee != 0 %}
                 <tr class="totals-row">
                     <td colspan="4" class="text-right">{{ _("Dunning Fee") }}</td>
-                    <td class="text-right">{{ doc.get_formatted("dunning_fee") }}</td>
+                    <td class="text-right">{{ format_currency(doc.dunning_fee) }}</td>
                     {% if show_interest %}
                     <td></td>
                     {% endif %}
@@ -215,7 +113,7 @@
 
                 <tr class="totals-row">
                     <td colspan="4" class="text-right">{{ _("Grand Total") }}</td>
-                    <td class="text-right">{{ doc.get_formatted("grand_total") if doc.grand_total else "0.00" }}</td>
+                    <td class="text-right">{{ format_currency(doc.grand_total or 0) }}</td>
                     {% if show_interest %}
                     <td></td>
                     {% endif %}
@@ -265,9 +163,53 @@
 
 </div>
 
-<!-- FOOTER -->
-<div id="footer-html" class="visible-pdf">
-    <div class="print-format-footer">
-        {{ footer }}
-    </div>
-</div>
+    <br>
+{{ render_footer(footer) }}
+{{ render_shared_styles() }}
+
+<style>
+.print-format h1, 
+.print-format h1 * {
+    font-size: 18px !important;
+    color: #B2160E;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.print-format .meta-table td,
+.print-format .dunning-table td,
+.print-format .dunning-table th {
+    padding: 6px 6px;
+    vertical-align: top;
+}
+
+.print-format .dunning-table {
+    width: 100%;
+    margin-top: 10px;
+    table-layout: fixed;
+}
+
+.print-format .dunning-table th,
+.print-format .dunning-table td {
+    border: 1px solid #d9d9d9;
+    word-wrap: break-word;
+}
+
+.print-format .dunning-table th {
+    background: #f3f3f3;
+    font-weight: bold;
+}
+
+.print-format .totals-row td {
+    font-weight: bold;
+    background: #fafafa;
+}
+
+.print-format .spacer-10 {
+    height: 10px;
+}
+
+.print-format .spacer-20 {
+    height: 20px;
+}
+</style>
