@@ -1,4 +1,4 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation %}
 {{ render_letter_head(letter_head) }}
 
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
@@ -44,18 +44,7 @@
     </div>
     <br>
 
-    {% if doc.contact_person %}
-        {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        {% if contact.salutation == "Herr" %}
-            {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
-        {% elif contact.salutation == "Frau" %}
-            {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
-        {% else %}
-            {{ _("Dear Sir or Madam") }},
-        {% endif %}
-    {% else %}
-        {{ _("Dear Sir or Madam") }},
-    {% endif %}
+    {{ render_contact_salutation(doc) }}
 
     <br>
     {{ _("Thank you for your interest. I am pleased to present you with the following offer. This offer is subject to change.") }}
