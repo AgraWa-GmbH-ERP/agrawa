@@ -43,6 +43,21 @@
 {%- endif -%}
 {%- endmacro %}
 
+{%- macro render_contact_salutation(doc) -%}
+{% if doc.contact_person %}
+    {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
+    {% if contact.salutation == "Herr" %}
+        {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
+    {% elif contact.salutation == "Frau" %}
+        {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
+    {% else %}
+        {{ _("Dear Sir or Madam") }},
+    {% endif %}
+{% else %}
+    {{ _("Dear Sir or Madam") }},
+{% endif %}
+{%- endmacro %}
+
 {%- macro render_footer(footer) -%}
 <div id="footer-html" class="visible-pdf">
     <div class="print-format-footer">
