@@ -46,15 +46,31 @@
 {%- macro render_address_block(doc) -%}
 <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
     <span style="color: #B2160E;">AgraWa GmbH</span> 
-    <span style="color: 83AD29;">|</span> 
+    <span style="color: green;">|</span> 
     <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
-    <span style="color: 83AD29;">|</span> 
+    <span style="color: green;">|</span> 
     <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
     
     <div style="margin-top: 0.2cm;">
-        <strong>{{ doc.customer_name or doc.party_name }}</strong><br>
-        {% if doc.address_display %}
-            {{ doc.address_display }}
+        <strong>{{ doc.customer_name }}</strong><br>
+        {% set customer_address_name = doc.customer_address %}
+        {% if customer_address_name and frappe.db.exists("Address", customer_address_name) %}
+            {% set customer_address = frappe.get_doc("Address", customer_address_name) %}
+            {% if customer_address.address_line1 %}
+                {{ customer_address.address_line1 }}<br>
+            {% endif %}
+            {% if customer_address.pincode or customer_address.city %}
+                {% if customer_address.pincode and customer_address.city %}
+                    {{ customer_address.pincode }} {{ customer_address.city }}<br>
+                {% elif customer_address.pincode %}
+                    {{ customer_address.pincode }}<br>
+                {% elif customer_address.city %}
+                    {{ customer_address.city }}<br>
+                {% endif %}
+            {% endif %}
+            {% if customer_address.country %}
+                {{ _(customer_address.country) }}
+            {% endif %}
         {% endif %}
     </div>
 </div>
