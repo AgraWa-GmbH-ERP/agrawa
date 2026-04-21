@@ -26,6 +26,71 @@
 {%- endif -%}
 {%- endmacro %}
 
+{%- macro format_date(date_value) -%}
+{%- if date_value -%}
+    {%- if date_value is string -%}
+        {%- set date_parts = date_value.split('-') -%}
+        {%- if date_parts|length == 3 -%}
+            {{ date_parts[2] }}.{{ date_parts[1] }}.{{ date_parts[0] }}
+        {%- else -%}
+            {{ date_value }}
+        {%- endif -%}
+    {%- else -%}
+        {{ date_value.strftime('%d.%m.%Y') if date_value.strftime else date_value }}
+    {%- endif -%}
+{%- else -%}
+    -
+{%- endif -%}
+{%- endmacro %}
+
+{%- macro render_address_block(doc) -%}
+<div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
+    <span style="color: #B2160E;">AgraWa GmbH</span> 
+    <span style="color: green;">|</span> 
+    <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
+    <span style="color: green;">|</span> 
+    <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
+    
+    <div style="margin-top: 0.2cm;">
+        <strong>{{ doc.customer_name }}</strong><br>
+        {% set customer_address_name = doc.customer_address %}
+        {% if customer_address_name and frappe.db.exists("Address", customer_address_name) %}
+            {% set customer_address = frappe.get_doc("Address", customer_address_name) %}
+            {% if customer_address.address_line1 %}
+                {{ customer_address.address_line1 }}<br>
+            {% endif %}
+            {% if customer_address.pincode or customer_address.city %}
+                {% if customer_address.pincode and customer_address.city %}
+                    {{ customer_address.pincode }} {{ customer_address.city }}<br>
+                {% elif customer_address.pincode %}
+                    {{ customer_address.pincode }}<br>
+                {% elif customer_address.city %}
+                    {{ customer_address.city }}<br>
+                {% endif %}
+            {% endif %}
+            {% if customer_address.country %}
+                {{ _(customer_address.country) }}
+            {% endif %}
+        {% endif %}
+    </div>
+</div>
+{%- endmacro %}
+
+{%- macro render_contact_salutation(doc) -%}
+{% if doc.contact_person %}
+    {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
+    {% if contact.salutation == "Herr" %}
+        {{ _("Dear Mr.") }} {{ contact.last_name or "" }},
+    {% elif contact.salutation == "Frau" %}
+        {{ _("Dear Mrs.") }} {{ contact.last_name or "" }},
+    {% else %}
+        {{ _("Dear Sir or Madam") }},
+    {% endif %}
+{% else %}
+    {{ _("Dear Sir or Madam") }},
+{% endif %}
+{%- endmacro %}
+
 {%- macro render_footer(footer) -%}
 <div id="footer-html" class="visible-pdf">
     <div class="print-format-footer">
