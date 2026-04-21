@@ -5,6 +5,7 @@ app_description = "Agrawa Customization"
 app_email = "support@phamos.eu"
 app_license = "mit"
 
+required_apps = ["print_designer"]
 
 doctype_list_js = {
     "Purchase Invoice": "public/js/purchase_invoice_list.js",
@@ -96,3 +97,5 @@ override_doctype_dashboards = {
 jinja = {
     "methods": ["agrawa.utils.get_merged_so_items_from_po"]
 }
+
+after_migrate = ["agrawa.setup_chromium.setup_print_designer_chromium"]
