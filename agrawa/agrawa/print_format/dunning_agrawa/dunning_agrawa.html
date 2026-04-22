@@ -105,22 +105,17 @@
     <div style="line-height:1.7;">
         {{ doc.body_text }}
     </div>
-    <div class="spacer-10"></div>
     {% else %}
     <div style="line-height:1.7;">
         {{ _("Please note that your payment may have crossed with this reminder. If the amount has already been settled, please consider this letter as void.") }}
-        <br><br>
+        <br>
         {{ _("If payment has not yet been made, we kindly request prompt transfer of the outstanding amount.") }}
     </div>
     {% endif %}
-
-    <div class="spacer-20"></div>
-
     {% if doc.closing_text %}
     <div style="line-height:1.7;">
         {{ doc.closing_text }}
     </div>
-    <div class="spacer-10"></div>
     {% endif %}
 
     <!-- Greeting -->
@@ -139,7 +134,6 @@
 
 </div>
 
-    <br>
 {{ render_footer(footer) }}
 {{ render_shared_styles() }}
 
