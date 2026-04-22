@@ -21,7 +21,7 @@
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
             <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
-            <b>{{ _("Date") }}:</b> {{ format_date(doc.date or doc.posting_date or frappe.utils.nowdate()) }}<br>
+            <b>{{ _("Date") }}:</b> {{ format_date(doc.posting_date or frappe.utils.nowdate()) }}<br>
             {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
             <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
         </div>
