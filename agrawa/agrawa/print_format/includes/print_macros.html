@@ -91,6 +91,18 @@
 {% endif %}
 {%- endmacro %}
 
+{%- macro render_tax_notice(doc) -%}
+<div style="margin-bottom: 5px;">
+    {% if doc.taxes_and_charges == "0% (Ausfuhr) - AW" %}
+        Diese Lieferung ist nach § 4 Nr. 1a i.V.m. § 6 UStG als steuerfreie Ausfuhrlieferung behandelt worden.
+        Der Ausfuhrnachweis ist vom Leistungsempfänger innerhalb von 3 Monaten ab Lieferdatum 
+        zu erbringen und dem leistenden Unternehmer vorzulegen.
+        Bei fehlendem oder verspätetem Nachweis kann die Steuerfreiheit entfallen 
+        und die Umsatzsteuer nacherhoben werden.
+    {% endif %}
+</div>
+{%- endmacro %}
+
 {%- macro render_footer(footer) -%}
 <div id="footer-html" class="visible-pdf">
     <div class="print-format-footer">

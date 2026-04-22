@@ -21,7 +21,7 @@
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
             <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
-            <b>{{ _("Date") }}:</b> {{ format_date(doc.date or doc.posting_date or frappe.utils.nowdate()) }}<br>
+            <b>{{ _("Date") }}:</b> {{ format_date(doc.posting_date or frappe.utils.nowdate()) }}<br>
             {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
             <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
         </div>
@@ -101,27 +101,23 @@
 
     <div class="spacer-20"></div>
 
-    {% if doc.body_text %}
+    {% if doc.body_text and doc.body_text != '<div class="ql-editor read-mode"><p><br></p></div>' %}
     <div style="line-height:1.7;">
         {{ doc.body_text }}
     </div>
-    <div class="spacer-10"></div>
     {% else %}
     <div style="line-height:1.7;">
         {{ _("Please note that your payment may have crossed with this reminder. If the amount has already been settled, please consider this letter as void.") }}
-        <br><br>
+        <br>
         {{ _("If payment has not yet been made, we kindly request prompt transfer of the outstanding amount.") }}
     </div>
     {% endif %}
-
-    <div class="spacer-20"></div>
-
-    {% if doc.closing_text %}
+    {% if doc.closing_text and doc.closing_text != '<div class="ql-editor read-mode"><p><br></p></div>' %}
     <div style="line-height:1.7;">
         {{ doc.closing_text }}
     </div>
-    <div class="spacer-10"></div>
     {% endif %}
+    <div class="spacer-20"></div>
 
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
@@ -139,7 +135,6 @@
 
 </div>
 
-    <br>
 {{ render_footer(footer) }}
 {{ render_shared_styles() }}
 
