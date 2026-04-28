@@ -1,4 +1,4 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_tax_notice %}
 {{ render_letter_head(letter_head) }}
 
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
@@ -9,9 +9,9 @@
     <!-- Left side (address block inside window) -->
     <div style="text-align: left; width: 8.5cm; height: 100%; margin-left: 10mm;">
         <span style="color: #B2160E;">AgraWa GmbH</span> 
-        <span style="color: 83AD29;">|</span> 
+        <span style="color: green;">|</span> 
         <span style="color: #B2160E;">Sonnenbergstr. 17/1</span> 
-        <span style="color: 83AD29;">|</span> 
+        <span style="color: green;">|</span> 
         <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
         
         <div style="margin-top: 0.2cm;">
@@ -46,7 +46,7 @@
                     {% endif %}
                 {% endif %}
                 {% if customer_address.country %}
-                    {{ customer_address.country }}
+                    {{ _(customer_address.country) }}
                 {% endif %}
             {% endif %}
         </div>
@@ -60,21 +60,21 @@
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
-        <h1><b>RECHNUNG</b></h1>
+        <h1><b>{{ _("INVOICE") }}</b></h1>
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
             {% set first_si_item = doc.items[0] if doc.items else None %}
             {% if first_si_item and first_si_item.sales_order %}
                 {% set so = frappe.get_doc("Sales Order", first_si_item.sales_order) %}
-                <b>Auftrags-/AngebotsN°: </b>{{ so.name }}<br>
-                <b>Auftragsdatum: </b>{{ so.transaction_date }}<br>
+                <b>{{ _("Order/Quote No.") }}: </b>{{ so.name }}<br>
+                <b>{{ _("Order Date") }}: </b>{{ format_date(so.transaction_date) }}<br>
             {% endif %}
             {% if doc.custom_supplier_delivery_date %}
-                <b>Lieferdatum: </b>{{ doc.custom_supplier_delivery_date }}<br>
+                <b>{{ _("Delivery Date") }}: </b>{{ format_date(doc.custom_supplier_delivery_date) }}<br>
             {% endif %}
-            <b>Kundennr.: </b>{{ doc.customer }}<br>
-            <b>Ihr Ansprechpartner: </b>Herr Schweikart<br>
+            <b>{{ _("Customer No.") }}: </b>{{ doc.customer }}<br>
+            <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>
             +49 176 17942780<br>
         </div>
 
@@ -97,15 +97,10 @@
         </div>
     </div>
     <br>
-    {% if doc.contact_person %}
-        {% set contact = frappe.get_doc("Contact", doc.contact_person) %}
-        Sehr geehrter {{contact.salutation or ""}} {{ contact.last_name or "" }},
-    {% else %}
-        Sehr geehrter Damen und Herren,
-    {% endif %}
+    {{ render_contact_salutation(doc) }}
 
     <br>
-        Vielen Dank, für Ihren Auftrag. Vereinbarungsgemäß berechnen wir Ihnen hiermit folgende Leistungen: 
+        {{ _("Thank you for your order. As agreed, we charge you for the following services:") }} 
     <br><br>
 
     <table class=" table-sm pricetable" >
@@ -117,7 +112,7 @@
             <th style="width:1.5cm;">{{ _("Packing Unit") }}</th>
             <th style="width:1.5cm;">{{ _("Item Number") }}</th>
             <th style="width:2.0cm;" class="text-right">{{ _("Sales Price") }}</th>
-            <th style="width:1.5cm;" class="text-right">{{ _("Menge / EH") }}</th>
+            <th style="width:1.5cm;" class="text-right">{{ _("Quantity / Unit") }}</th>
             <th style="width:1.0cm;" class="text-right">{{ _("Pricing Unit") }}</th>
             <th style="width:2.5cm;" class="text-right">{{ _("Total Amount") }}</th>
         </tr>
@@ -175,8 +170,10 @@
         </tr>
 
     </tbody>
-</table>
+    </table>
 
+    <!-- Taxes and Charges -->
+    {{ render_tax_notice(doc) }}
     <br>
     <div style="page-break-inside: avoid;">
         <p>
@@ -187,11 +184,9 @@
     <br>
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        Vielen Dank für diesen Auftrag. Setzten Sie mit der AgraWa GmbH auch in Zukunft auf den richtigen Partner. Gerne
-        bieten wir Ihnen weitere Betriebsmittel an.<br>
-        Wir danken Ihnen für Ihr Vertrauen und die gute Zusammenarbeit. Bitte empfehlen Sie uns weiter.  Bei Rückfragen stehen
-        wir selbstverständlich jederzeit gerne zur Verfügung. <br>
-        Mit freundlichen Grüßen:<br> 
+        {{ _("Thank you for this order. In the future, continue to rely on AgraWa GmbH as the right partner. We are happy to offer you additional supplies.") }}<br>
+        {{ _("We thank you for your trust and good cooperation. Please recommend us to others. If you have any questions, we are of course always happy to help.") }} <br>
+        {{ _("Kind regards") }}:<br> 
         {% if user_details %}
             {% if user_details.signature %}
                 <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
@@ -203,8 +198,6 @@
     </div>
 
 </div>
-
-    <br>
 {{ render_footer(footer) }}
 {{ render_shared_styles() }}
 

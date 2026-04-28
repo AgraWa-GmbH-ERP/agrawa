@@ -1,0 +1,186 @@
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_address_block %}
+{% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
+
+{{ render_letter_head(letter_head) }}
+
+<!-- Address + Company info section -->
+<div class="company-and-address-info">
+
+    <!-- Left side (address block inside window) -->
+    {{ render_address_block(doc) }}
+
+    {{ render_company_block() }}
+</div>
+
+<!-- BODY Wrapper -->
+<div class="body-wrapper">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+        <!-- Left side -->
+        <h1><b>{{ _("Dunning") }}</b></h1>
+
+        <!-- Right side -->
+        <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
+            <b>{{ _("Dunning No.") }}:</b> {{ doc.name }}<br>
+            <b>{{ _("Date") }}:</b> {{ format_date(doc.posting_date or frappe.utils.nowdate()) }}<br>
+            {% if doc.customer %}<b>{{ _("Customer No.") }}:</b> {{ doc.customer }}<br>{% endif %}
+            <b>{{ _("Your Contact Person") }}: </b>Herr Schweikart<br>+49 176 17942780<br>
+        </div>
+    </div>
+    <div class="spacer-20"></div>
+
+    {{ render_contact_salutation(doc) }}
+
+    <div class="spacer-10"></div>
+
+    <div style="line-height:1.7;">
+        {{ _("We have noted that the invoice(s) listed below have not been fully settled despite being due. We kindly request that you settle the outstanding amount promptly, stating the respective invoice number.") }}
+    </div>
+
+    <div class="spacer-10"></div>
+
+    {% set show_interest = doc.total_interest and doc.total_interest != 0 %}
+
+    {% if doc.overdue_payments %}
+    <div class="avoid-break">
+        <table class="dunning-table">
+            <thead>
+                <tr>
+                    <th style="width:6%;">{{ _("Pos.") }}</th>
+                    <th style="{% if show_interest %}width:28%;{% else %}width:34%;{% endif %}">{{ _("Invoice") }}</th>
+                    <th style="width:14%;">{{ _("Dunning Level") }}</th>
+                    <th style="width:14%;">{{ _("Days") }}</th>
+                    <th style="{% if show_interest %}width:19%;{% else %}width:32%;{% endif %}" class="text-right">{{ _("Outstanding") }}</th>
+                    {% if show_interest %}
+                    <th style="width:19%;" class="text-right">{{ _("Interest") }}</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in doc.overdue_payments %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ row.sales_invoice or "" }}</td>
+                    <td>{{ row.dunning_level or "" }}</td>
+                    <td>{{ row.overdue_days or 0 }}</td>
+                    <td class="text-right">{{ format_currency(row.outstanding or 0) }}</td>
+                    {% if show_interest %}
+                    <td class="text-right">{{ format_currency(row.interest or 0) }}</td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">{{ _("Total Outstanding") }}</td>
+                    <td class="text-right">{{ format_currency(doc.total_outstanding or 0) }}</td>
+                    {% if show_interest %}
+                    <td class="text-right">{{ format_currency(doc.total_interest or 0) }}</td>
+                    {% endif %}
+                </tr>
+
+                {% if doc.dunning_fee and doc.dunning_fee != 0 %}
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">{{ _("Dunning Fee") }}</td>
+                    <td class="text-right">{{ format_currency(doc.dunning_fee) }}</td>
+                    {% if show_interest %}
+                    <td></td>
+                    {% endif %}
+                </tr>
+                {% endif %}
+
+                <tr class="totals-row">
+                    <td colspan="4" class="text-right">{{ _("Grand Total") }}</td>
+                    <td class="text-right">{{ format_currency(doc.grand_total or 0) }}</td>
+                    {% if show_interest %}
+                    <td></td>
+                    {% endif %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    {% endif %}
+
+    <div class="spacer-20"></div>
+
+    {% if doc.body_text and doc.body_text != '<div class="ql-editor read-mode"><p><br></p></div>' %}
+    <div style="line-height:1.7;">
+        {{ doc.body_text }}
+    </div>
+    {% else %}
+    <div style="line-height:1.7;">
+        {{ _("Please note that your payment may have crossed with this reminder. If the amount has already been settled, please consider this letter as void.") }}
+        <br>
+        {{ _("If payment has not yet been made, we kindly request prompt transfer of the outstanding amount.") }}
+    </div>
+    {% endif %}
+    {% if doc.closing_text and doc.closing_text != '<div class="ql-editor read-mode"><p><br></p></div>' %}
+    <div style="line-height:1.7;">
+        {{ doc.closing_text }}
+    </div>
+    {% endif %}
+    <div class="spacer-20"></div>
+
+    <!-- Greeting -->
+    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
+        {{ _("If you have any questions, we are of course always happy to help.") }} <br>
+        {{ _("Kind regards") }}:<br> 
+        {% if user_details %}
+            {% if user_details.signature %}
+                <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
+                    <img src="{{ user_details.signature }}" alt="Logo" style="width: 150px; height: auto;">
+                </div>
+            {% endif %}
+            {{ user_details.full_name if user_details.full_name else '' }}
+        {% endif %}  
+    </div>
+
+</div>
+
+{{ render_footer(footer) }}
+{{ render_shared_styles() }}
+
+<style>
+.print-format h1, 
+.print-format h1 * {
+    font-size: 18px !important;
+    color: #B2160E;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+.print-format .meta-table td,
+.print-format .dunning-table td,
+.print-format .dunning-table th {
+    padding: 6px 6px;
+    vertical-align: top;
+}
+
+.print-format .dunning-table {
+    width: 100%;
+    margin-top: 10px;
+    table-layout: fixed;
+}
+
+.print-format .dunning-table th,
+.print-format .dunning-table td {
+    border: 1px solid #d9d9d9;
+    word-wrap: break-word;
+}
+
+.print-format .dunning-table th {
+    background: #f3f3f3;
+    font-weight: bold;
+}
+
+.print-format .totals-row td {
+    font-weight: bold;
+    background: #fafafa;
+}
+
+.print-format .spacer-10 {
+    height: 10px;
+}
+
+.print-format .spacer-20 {
+    height: 20px;
+}
+</style>
