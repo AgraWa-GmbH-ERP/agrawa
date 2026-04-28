@@ -1,4 +1,4 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_address_block %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_address_block, render_tax_notice %}
 {{ render_letter_head(letter_head) }}
 
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
@@ -105,6 +105,8 @@
     </tbody>
 </table>
 
+    <!-- Taxes and Charges -->
+    {{ render_tax_notice(doc) }}
     <br>
     <div style="page-break-inside: avoid;">
         <p>
@@ -128,8 +130,6 @@
     </div>
 
 </div>
-
-    <br>
 {{ render_footer(footer) }}
 {{ render_shared_styles() }}
 
