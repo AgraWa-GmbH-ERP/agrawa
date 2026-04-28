@@ -85,8 +85,15 @@
         <h6><b>N°: {{doc.name}}</b></h6>
 
         <!-- Right side -->
-        <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
-                    <p><b>{{format_date(doc.due_date)}}</b></p>
+        <div style="font-size: 12px; line-height: 1.6; margin-left: auto;">
+            <div style="display: flex; justify-content: space-between; width: 150px;">
+                <b>{{ _("Due Date") }}:</b>
+                <b>{{ format_date(doc.due_date) }}</b>
+            </div>
+            <div style="display: flex; justify-content: space-between; width: 150px;">
+                <b>{{ _("Posting Date") }}:</b>
+                <b>{{ format_date(doc.posting_date) }}</b>
+            </div>
         </div>
     </div>
     <br>
