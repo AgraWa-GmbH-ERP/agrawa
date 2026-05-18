@@ -60,6 +60,7 @@ override_doctype_class = {
 
 override_whitelisted_methods = {
     "erpnext.selling.doctype.sales_order.sales_order.make_purchase_order": "agrawa.overrides.sales_order_to_purchase_order.make_purchase_order",
+    "erpnext.controllers.accounts_controller.update_child_qty_rate": "agrawa.overrides.accounts_controller.update_child_qty_rate",
     "erpnext.buying.doctype.purchase_order.purchase_order.make_purchase_invoice": "agrawa.overrides.purchase_order_autoname.make_purchase_invoice"
 }
 
