@@ -60,7 +60,7 @@
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
-        <h1><b>{{ _("INVOICE") }}</b></h1>
+        <h1><b>{% if doc.is_return %}GUTSCHRIFT{% else %}{{ _("INVOICE") }}{% endif %}</b></h1>
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
@@ -100,7 +100,11 @@
     {{ render_contact_salutation(doc) }}
 
     <br>
-        {{ _("Thank you for your order. As agreed, we charge you for the following services:") }} 
+        {% if doc.is_return %}
+            {{ _("Today we credit the following amount to your account:") }}
+        {% else %}
+            {{ _("Thank you for your order. As agreed, we charge you for the following services:") }}
+        {% endif %}
     <br><br>
 
     <table class=" table-sm pricetable" >
@@ -184,8 +188,12 @@
     <br>
     <!-- Greeting -->
     <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        {{ _("Thank you for this order. In the future, continue to rely on AgraWa GmbH as the right partner. We are happy to offer you additional supplies.") }}<br>
-        {{ _("We thank you for your trust and good cooperation. Please recommend us to others. If you have any questions, we are of course always happy to help.") }} <br>
+        {% if doc.is_return %}
+            {{ _("We sincerely thank you for your support. The credit amount will be credited to your account in the coming days.") }}<br><br>
+        {% else %}
+            {{ _("Thank you for this order. In the future, continue to rely on AgraWa GmbH as the right partner. We are happy to offer you additional supplies.") }}<br>
+            {{ _("We thank you for your trust and good cooperation. Please recommend us to others. If you have any questions, we are of course always happy to help.") }} <br>
+        {% endif %}
         {{ _("Kind regards") }}:<br> 
         {% if user_details %}
             {% if user_details.signature %}
