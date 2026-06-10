@@ -60,7 +60,7 @@
 
     <div style="display: flex; justify-content: space-between; align-items: flex-start;">
         <!-- Left side -->
-        <h1><b>{% if doc.is_return %}GUTSCHRIFT{% else %}{{ _("INVOICE") }}{% endif %}</b></h1>
+        <h1><b>{% if doc.is_return %}{{ _("CREDIT NOTE") }}{% else %}{{ _("INVOICE") }}{% endif %}</b></h1>
 
         <!-- Right side -->
         <div style="text-align: left; font-size: 12px; line-height: 1.6; margin-left: auto;">
