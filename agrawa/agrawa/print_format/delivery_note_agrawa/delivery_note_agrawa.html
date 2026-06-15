@@ -1,7 +1,5 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_address_block %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_address_block, render_signature_block %}
 {{ render_letter_head(letter_head) }}
-
-{% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
 
 <!-- Address + Company info section -->
 <div class="company-and-address-info">
@@ -81,18 +79,7 @@
     </div>
     <br>
     <!-- Greeting -->
-    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        {{ _("If you have any questions, we are of course always happy to help.") }} <br>
-        {{ _("Kind regards") }}:<br> 
-        {% if user_details %}
-            {% if user_details.signature %}
-                <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
-                    <img src="{{ user_details.signature }}" alt="Logo" style="width: 150px; height: auto;">
-                </div>
-            {% endif %}
-            {{ user_details.full_name if user_details.full_name else '' }}
-        {% endif %}  
-    </div>
+    {{ render_signature_block(_("If you have any questions, we are of course always happy to help.") + " <br>") }}
 
 </div>
 {{ render_footer(footer) }}
