@@ -1,7 +1,5 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_tax_notice %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_tax_notice, render_signature_block %}
 {{ render_letter_head(letter_head) }}
-
-{% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
 
 <!-- Address + Company info section -->
 <div class="company-and-address-info">
@@ -187,23 +185,11 @@
     </div>
     <br>
     <!-- Greeting -->
-    <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
-        {% if doc.is_return %}
-            {{ _("We sincerely thank you for your support. The credit amount will be credited to your account in the coming days.") }}<br><br>
-        {% else %}
-            {{ _("Thank you for this order. In the future, continue to rely on AgraWa GmbH as the right partner. We are happy to offer you additional supplies.") }}<br>
-            {{ _("We thank you for your trust and good cooperation. Please recommend us to others. If you have any questions, we are of course always happy to help.") }} <br>
-        {% endif %}
-        {{ _("Kind regards") }},<br> 
-        {% if user_details %}
-            {% if user_details.signature %}
-                <div style="flex: 0 0 auto; margin-right: 20px; text-align: left;">
-                    <img src="{{ user_details.signature }}" alt="Logo" style="width: 150px; height: auto;">
-                </div>
-            {% endif %}
-            {{ user_details.full_name if user_details.full_name else '' }}
-        {% endif %}  
-    </div>
+    {% if doc.is_return %}
+        {{ render_signature_block(_("We sincerely thank you for your support. The credit amount will be credited to your account in the coming days.") + "<br><br>") }}
+    {% else %}
+        {{ render_signature_block(_("Thank you for this order. In the future, continue to rely on AgraWa GmbH as the right partner. We are happy to offer you additional supplies.") + "<br>" + _("We thank you for your trust and good cooperation. Please recommend us to others. If you have any questions, we are of course always happy to help.") + " <br>") }}
+    {% endif %}
 
 </div>
 {{ render_footer(footer) }}
