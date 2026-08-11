@@ -1,4 +1,4 @@
-{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_tax_notice, render_signature_block %}
+{% from "agrawa/print_format/includes/print_macros.html" import render_letter_head, render_company_block, render_footer, render_shared_styles, format_currency, format_date, render_contact_salutation, render_tax_notice, render_signature_block, render_additional_discount %}
 {{ render_letter_head(letter_head) }}
 
 <!-- Address + Company info section -->
@@ -159,20 +159,7 @@
             {% endfor %}
 
         <!-- Additional Discount Row -->
-        {% if doc.discount_amount and doc.discount_amount != 0 %}
-            <tr>
-                <td colspan="8" class="text-right">
-                    <b>
-                        {% if doc.additional_discount_percentage %}
-                            {{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%
-                        {% else %}
-                            {{ _("Discount Amount") }}
-                        {% endif %}
-                    </b>
-                </td>
-                <td class="text-right"><b>{{ format_currency(doc.discount_amount) }}</b></td>
-            </tr>
-        {% endif %}
+        {{ render_additional_discount(doc) }}
         <!-- Grand Total Row -->
         <tr>
             <td colspan="8" class="text-right"><b>{{ _("Grand Total") }}</b></td>
