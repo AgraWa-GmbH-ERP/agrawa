@@ -159,9 +159,17 @@
             {% endfor %}
 
         <!-- Additional Discount Row -->
-        {% if doc.additional_discount_percentage and doc.discount_amount %}
+        {% if doc.discount_amount and doc.discount_amount != 0 %}
             <tr>
-                <td colspan="8" class="text-right"><b>{{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%</b></td>
+                <td colspan="8" class="text-right">
+                    <b>
+                        {% if doc.additional_discount_percentage %}
+                            {{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%
+                        {% else %}
+                            {{ _("Discount Amount") }}
+                        {% endif %}
+                    </b>
+                </td>
                 <td class="text-right"><b>{{ format_currency(doc.discount_amount) }}</b></td>
             </tr>
         {% endif %}
