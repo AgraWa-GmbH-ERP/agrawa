@@ -103,6 +103,23 @@
 </div>
 {%- endmacro %}
 
+{%- macro render_additional_discount(doc, colspan=8) -%}
+{% if doc.discount_amount and doc.discount_amount != 0 %}
+    <tr>
+        <td colspan="{{ colspan }}" class="text-right">
+            <b>
+                {% if doc.additional_discount_percentage %}
+                    {{ _("Additional Discount") }} {{ doc.additional_discount_percentage }}%
+                {% else %}
+                    {{ _("Discount Amount") }}
+                {% endif %}
+            </b>
+        </td>
+        <td class="text-right"><b>{{ format_currency(doc.discount_amount) }}</b></td>
+    </tr>
+{% endif %}
+{%- endmacro %}
+
 {%- macro render_signature_block(greeting_text) -%}
 {% set user_details = frappe.db.get_value("User Signature", {"name": frappe.session.user}, ["full_name", "signature"], as_dict=1) %}
 <div style="width: 100%; margin-bottom: 10px; page-break-inside: avoid;">
