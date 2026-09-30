@@ -52,10 +52,14 @@
     <span style="color: #B2160E;">71665 Vaihingen/Enz</span>
     
     <div style="margin-top: 0.2cm;">
-        <strong>{{ doc.customer_name }}</strong><br>
         {% set customer_address_name = doc.customer_address %}
+        {% set customer_address = None %}
         {% if customer_address_name and frappe.db.exists("Address", customer_address_name) %}
             {% set customer_address = frappe.get_doc("Address", customer_address_name) %}
+        {% endif %}
+        {% set recipient = customer_address and (customer_address.address_title or "").strip() %}
+        <strong>{{ recipient or doc.customer_name }}</strong><br>
+        {% if customer_address %}
             {% if customer_address.address_line1 %}
                 {{ customer_address.address_line1 }}<br>
             {% endif %}
